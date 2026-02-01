@@ -1,0 +1,13 @@
+[
+  {"model": "predictions.team", "pk": 1, "fields": {"name": "Red Bull Racing", "slug": "red-bull", "color": "#3671C6", "active": true}},
+  {"model": "predictions.team", "pk": 2, "fields": {"name": "Ferrari", "slug": "ferrari", "color": "#E80020", "active": true}},
+  {"model": "predictions.team", "pk": 3, "fields": {"name": "McLaren", "slug": "mclaren", "color": "#FF8000", "active": true}},
+  {"model": "predictions.team", "pk": 4, "fields": {"name": "Mercedes", "slug": "mercedes", "color": "#27F4D2", "active": true}},
+  {"model": "predictions.team", "pk": 5, "fields": {"name": "Aston Martin", "slug": "aston-martin", "color": "#229971", "active": true}},
+  {"model": "predictions.team", "pk": 6, "fields": {"name": "Alpine", "slug": "alpine", "color": "#FF87BC", "active": true}},
+  {"model": "predictions.team", "pk": 7, "fields": {"name": "Williams", "slug": "williams", "color": "#64C4FF", "active": true}},
+  {"model": "predictions.team", "pk": 8, "fields": {"name": "Racing Bulls", "slug": "racing-bulls", "color": "#6692FF", "active": true}},
+  {"model": "predictions.team", "pk": 9, "fields": {"name": "Audi", "slug": "audi", "color": "#52E252", "active": true}},
+  {"model": "predictions.team", "pk": 10, "fields": {"name": "Haas F1 Team", "slug": "haas", "color": "#B6BABD", "active": true}},
+  {"model": "predictions.team", "pk": 11, "fields": {"name": "Cadillac", "slug": "cadillac", "color": "#1E3D6B", "active": true}}
+]

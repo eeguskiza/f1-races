@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - F1 Porras{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card card-dark p-4 h-100">
+      <h2 class="pixel-title mb-3">Mis Puntos</h2>
+      <div class="display-4 fw-bold text-warning">{{ total_points }}</div>
+      <p class="text-secondary mt-2">puntos acumulados</p>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card card-dark p-4 h-100">
+      <h2 class="pixel-title mb-3">Proxima Carrera</h2>
+
+      {% if next_event %}
+        <div class="fw-semibold fs-5">{{ next_event.name }}</div>
+        <p class="text-secondary mb-3">
+          {% if next_event.race_start_utc %}
+            {{ next_event.race_start_utc|date:"d M Y H:i" }} UTC
+          {% endif %}
+        </p>
+
+        {% if next_event.is_locked %}
+          <span class="badge bg-secondary mb-2">Predicciones cerradas</span>
+        {% else %}
+          <span class="badge bg-success mb-2">Predicciones abiertas</span>
+          <p class="small text-secondary">
+            Cierre: {{ next_event.deadline_utc|date:"d M Y H:i" }} UTC
+          </p>
+        {% endif %}
+
+        <hr class="border-secondary">
+
+        {% if user_prediction %}
+          <div class="text-success">Tu prediccion esta registrada</div>
+          <small class="text-secondary">
+            Top5: {{ user_prediction.p1.code }}, {{ user_prediction.p2.code }},
+            {{ user_prediction.p3.code }}, {{ user_prediction.p4.code }}, {{ user_prediction.p5.code }}
+            | Alonso: P{{ user_prediction.alonso_pos_guess }}
+          </small>
+        {% else %}
+          <div class="text-warning">No has hecho prediccion</div>
+        {% endif %}
+
+      {% else %}
+        <p class="text-secondary">No hay carreras pendientes.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
