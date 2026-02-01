@@ -1,5 +1,43 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
 from .models import Prediction, Driver
+
+
+class SignupForm(UserCreationForm):
+    """Custom signup form with required unique email."""
+
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "tu@email.com"}),
+        help_text="Requerido. Introduce un email valido.",
+    )
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add form-control class to all fields
+        self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "usuario"})
+        self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "********"})
+        self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "********"})
+
+    def clean_email(self):
+        """Enforce unique email (case-insensitive)."""
+        email = self.cleaned_data.get("email", "").lower().strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Ya existe una cuenta con este email.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
+        if commit:
+            user.save()
+        return user
 
 
 class PredictionForm(forms.ModelForm):
@@ -31,7 +69,7 @@ class PredictionForm(forms.ModelForm):
         alonso_choices = [(0, "DNF")] + [(i, str(i)) for i in range(1, 21)]
         self.fields["alonso_pos_guess"] = forms.ChoiceField(
             choices=alonso_choices,
-            label="Posición de Alonso",
+            label="Posicion de Alonso",
             widget=forms.Select(attrs={"class": "form-select"}),
         )
 

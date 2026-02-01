@@ -1,31 +1,21 @@
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models import Sum, Count
-from django import forms
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from .models import GrandPrix, Prediction, Driver, NewsPost
-from .forms import PredictionForm
-
-
-class SignupForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data["email"]
-        if commit:
-            user.save()
-        return user
+from .models import GrandPrix, Prediction, NewsPost, Driver
+from .forms import PredictionForm, SignupForm
 
 
 def home(request):
     """Public home page with news and next GP."""
-    # Recent news (3-6 posts)
+    # If not authenticated, redirect to login
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    # Recent news (6 posts)
     news = NewsPost.objects.all()[:6]
 
     # Next GP (first with race_start_utc in future)
@@ -44,14 +34,20 @@ def home(request):
 
 
 def signup(request):
+    """User registration view."""
+    if request.user.is_authenticated:
+        return redirect("predictions:dashboard")
+
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, f"Cuenta creada. Bienvenido, {user.username}!")
             return redirect("predictions:home")
     else:
         form = SignupForm()
+
     return render(request, "registration/signup.html", {"form": form})
 
 
@@ -83,11 +79,15 @@ def dashboard(request):
         "event", "p1", "p2", "p3", "p4", "p5"
     ).order_by("-event__round")[:5]
 
+    # Recent news (3 posts)
+    news = NewsPost.objects.all()[:3]
+
     context = {
         "total_points": total_points,
         "next_event": next_event,
         "user_prediction": user_prediction,
         "recent_predictions": recent_predictions,
+        "news": news,
     }
     return render(request, "predictions/dashboard.html", context)
 

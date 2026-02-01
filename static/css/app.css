@@ -3,7 +3,7 @@
   --card: #111827;
   --line: #2a3444;
   --txt: #e5e7eb;
-  --muted: #9ca3af;
+  --muted: #93c5fd;
   --accent: #f59e0b;
   --open: #22c55e;
   --closed: #ef4444;
@@ -13,6 +13,11 @@ body{
   background: radial-gradient(1200px 600px at 20% 10%, #131c2f 0%, var(--bg) 55%);
   color: var(--txt);
   min-height: 100vh;
+}
+
+/* Override Bootstrap text-muted */
+.text-muted{
+  color: var(--muted) !important;
 }
 
 /* Cards */
@@ -84,7 +89,8 @@ body{
 .track-slot img{
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 8px;
 }
 
 .track-slot-lg{
@@ -353,3 +359,57 @@ body{
 .text-open{ color: var(--open); }
 .text-closed{ color: var(--closed); }
 .border-accent{ border-color: var(--accent) !important; }
+
+/* Welcome intro banner */
+.welcome-intro{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(90deg, var(--bg) 0%, #1a2332 50%, var(--bg) 100%);
+  border-bottom: 2px solid var(--accent);
+  padding: 12px 20px;
+  text-align: center;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.welcome-intro.fade-out{
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.welcome-text{
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 576px){
+  .welcome-text{
+    font-size: 0.5rem;
+  }
+}
+
+/* News image styling */
+.news-image-wrapper{
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.3);
+}
+
+.news-image{
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 576px){
+  .news-image{
+    max-height: 180px;
+  }
+}

@@ -45,4 +45,14 @@ class PredictionAdmin(admin.ModelAdmin):
 
 @admin.register(NewsPost)
 class NewsPostAdmin(admin.ModelAdmin):
-    list_display = ["title", "created_at"]
+    list_display = ["title", "created_at", "has_image"]
+    list_filter = ["created_at"]
+    search_fields = ["title", "body"]
+    fieldsets = [
+        (None, {"fields": ["title", "body"]}),
+        ("Imagen", {"fields": ["image_url"], "classes": ["collapse"]}),
+    ]
+
+    @admin.display(boolean=True, description="Imagen")
+    def has_image(self, obj):
+        return bool(obj.image_url)

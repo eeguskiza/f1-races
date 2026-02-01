@@ -27,7 +27,7 @@ class SeedCommandTests(TestCase):
 
     def test_seed_creates_events(self):
         call_command("seed_2026", stdout=StringIO())
-        self.assertEqual(GrandPrix.objects.count(), 23)
+        self.assertEqual(GrandPrix.objects.count(), 24)  # 23 original + Madrid GP
 
     def test_seed_creates_sessions(self):
         call_command("seed_2026", stdout=StringIO())
@@ -40,7 +40,7 @@ class SeedCommandTests(TestCase):
         call_command("seed_2026", stdout=StringIO())
         self.assertEqual(Team.objects.count(), 11)
         self.assertEqual(Driver.objects.count(), 22)
-        self.assertEqual(GrandPrix.objects.count(), 23)
+        self.assertEqual(GrandPrix.objects.count(), 24)  # 23 original + Madrid GP
 
     def test_every_event_has_fp1(self):
         """Every event should have FP1 session."""

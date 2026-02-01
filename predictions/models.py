@@ -169,6 +169,7 @@ class Prediction(models.Model):
 class NewsPost(models.Model):
     title = models.CharField(max_length=140)
     body = models.TextField()
+    image_url = models.URLField(blank=True, help_text="URL de imagen externa (opcional)")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
