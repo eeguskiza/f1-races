@@ -1,36 +1,93 @@
-{% extends "base.html" %}
-{% block title %}F1 Porras{% endblock %}
+{% extends 'base.html' %}
+{% load circuit_tags %}
+{% block title %}F1 Porras 2026{% endblock %}
 
 {% block content %}
-<div class="row g-4 align-items-stretch">
+<div class="row g-4">
+  <!-- Left column: News -->
   <div class="col-lg-7">
-    <div class="card card-dark p-4 h-100">
-      <h1 class="pixel-title mb-3">Temporada 2026</h1>
-      <p class="text-secondary mb-4">
-        Predice el <b>Top 5</b> y la <b>posición de Alonso</b>. Cierre: <b>antes de FP3</b>.
-      </p>
+    <h2 class="pixel-title mb-4">NOTICIAS</h2>
 
-      <div class="d-flex gap-2 flex-wrap">
-        <a class="btn btn-warning" href="#">Hacer mi predicción</a>
-        <a class="btn btn-outline-light" href="#">Leaderboard</a>
-        <a class="btn btn-outline-secondary" href="#">Calendario</a>
+    {% if news %}
+      <div class="row g-3">
+        {% for post in news %}
+        <div class="col-12">
+          <div class="news-card">
+            <h5 class="mb-2">{{ post.title }}</h5>
+            <p class="text-muted small mb-2">{{ post.created_at|date:"d M Y, H:i" }}</p>
+            <p class="mb-0">{{ post.body|truncatewords:40 }}</p>
+          </div>
+        </div>
+        {% endfor %}
       </div>
-
-      <div class="mt-4 pixel-box">
-        <div class="small text-secondary">⚡ Próxima carrera (placeholder)</div>
-        <div class="fw-semibold">—</div>
+    {% else %}
+      <div class="pixel-box text-center py-5">
+        <p class="text-muted mb-0">No hay noticias todavia...</p>
+        <p class="small text-muted mt-2">Las novedades apareceran aqui</p>
       </div>
-    </div>
+    {% endif %}
   </div>
 
+  <!-- Right column: Next GP + CTA -->
   <div class="col-lg-5">
-    <div class="card card-dark p-4 h-100">
-      <h2 class="pixel-title mb-3">Pixel vibe</h2>
-      <p class="text-secondary">
-        Aquí irá el circuito pixelado + overlay de coche/driver normal.
+    {% if next_event %}
+    <div class="highlight-box mb-4">
+      <h3 class="pixel-title-sm text-accent mb-3">PROXIMO GP</h3>
+      <h4 class="mb-2">{{ next_event.name }}</h4>
+      <p class="text-muted mb-1">{{ next_event.country }} - {{ next_event.circuit }}</p>
+
+      {% if next_event.race_start_utc %}
+      <p class="mb-3">
+        <span class="text-muted">Carrera:</span>
+        {{ next_event.race_start_utc|date:"d M Y, H:i" }} UTC
       </p>
-      <div class="pixel-placeholder mt-2"></div>
+      {% endif %}
+
+      {% if next_event.deadline_utc %}
+      <div class="pixel-box mb-3">
+        <p class="small text-muted mb-1">Deadline predicciones:</p>
+        <p class="mb-0 {% if next_event.is_locked %}text-closed{% else %}text-open{% endif %}">
+          {{ next_event.deadline_utc|date:"d M Y, H:i" }} UTC
+          {% if next_event.is_locked %}
+          <span class="badge-pixel badge-closed ms-2">CERRADO</span>
+          {% else %}
+          <span class="badge-pixel badge-open ms-2">ABIERTO</span>
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+
+      {% circuit_slot next_event.slug "mb-3" %}
+
+      <a href="{% url 'predictions:race_detail' next_event.slug %}" class="btn btn-warning w-100">
+        Ver carrera
+      </a>
     </div>
+    {% else %}
+    <div class="pixel-box text-center py-4 mb-4">
+      <p class="text-muted mb-0">No hay carreras programadas</p>
+    </div>
+    {% endif %}
+
+    <!-- CTA for non-authenticated users -->
+    {% if not user.is_authenticated %}
+    <div class="card-dark p-4 text-center">
+      <h4 class="pixel-title-sm mb-3">UNETE A LA PORRA</h4>
+      <p class="text-muted mb-4">Predice el Top 5 de cada carrera y la posicion de Alonso</p>
+      <div class="d-grid gap-2">
+        <a href="{% url 'predictions:signup' %}" class="btn btn-warning btn-lg">Crear cuenta</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light">Ya tengo cuenta</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="card-dark p-4">
+      <p class="text-muted mb-3">Bienvenido, {{ user.username }}</p>
+      <div class="d-grid gap-2">
+        <a href="{% url 'predictions:dashboard' %}" class="btn btn-outline-light">Ir a mi Dashboard</a>
+        <a href="{% url 'predictions:races' %}" class="btn btn-outline-secondary">Ver calendario</a>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

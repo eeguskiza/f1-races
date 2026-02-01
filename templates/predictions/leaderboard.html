@@ -1,9 +1,66 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block title %}Leaderboard - F1 Porras{% endblock %}
 
 {% block content %}
-<div class="card card-dark p-4">
-  <h1 class="pixel-title mb-3">Leaderboard</h1>
-  <p class="text-secondary">Coming soon...</p>
+<h1 class="pixel-title mb-4">LEADERBOARD</h1>
+
+{% if users_data %}
+<div class="card-dark">
+  <div class="table-responsive">
+    <table class="table table-dark mb-0 leaderboard-table">
+      <thead>
+        <tr>
+          <th style="width: 60px;">#</th>
+          <th>Usuario</th>
+          <th class="text-end">Puntos</th>
+          <th class="text-end">Picks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for data in users_data %}
+        <tr>
+          <td>
+            {% with rank=forloop.counter %}
+            <span class="rank-badge {% if rank == 1 %}rank-1{% elif rank == 2 %}rank-2{% elif rank == 3 %}rank-3{% else %}rank-other{% endif %}">
+              {{ rank }}
+            </span>
+            {% endwith %}
+          </td>
+          <td>
+            <span class="{% if user.username == data.username %}text-accent{% endif %}">
+              {{ data.username }}
+              {% if user.username == data.username %}
+              <span class="text-muted small">(tu)</span>
+              {% endif %}
+            </span>
+          </td>
+          <td class="text-end">
+            <span class="pixel-title-sm">{{ data.total_score }}</span>
+          </td>
+          <td class="text-end text-muted">
+            {{ data.picks_count }}{% if total_races %}/{{ total_races }}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<p class="text-muted small mt-3">
+  Ranking ordenado por puntuacion total. Picks = predicciones hechas.
+</p>
+
+{% else %}
+<div class="pixel-box text-center py-5">
+  <p class="text-muted mb-0">Todavia no hay puntuaciones</p>
+  <p class="small text-muted mt-2">Las puntuaciones apareceran cuando se completen las carreras</p>
+</div>
+{% endif %}
+
+{% if user.is_authenticated %}
+<div class="mt-4">
+  <a href="{% url 'predictions:dashboard' %}" class="btn btn-outline-light">Ir a mi Dashboard</a>
+</div>
+{% endif %}
 {% endblock %}

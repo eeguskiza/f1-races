@@ -1,58 +1,83 @@
-{% extends "base.html" %}
-{% block title %}Carreras - F1 Porras{% endblock %}
+{% extends 'base.html' %}
+{% load circuit_tags %}
+{% block title %}Calendario - F1 Porras{% endblock %}
 
 {% block content %}
-<div class="card card-dark p-4">
-  <h1 class="pixel-title mb-4">Calendario 2026</h1>
+<h1 class="pixel-title mb-4">CALENDARIO 2026</h1>
 
-  <div class="table-responsive">
-    <table class="table table-dark table-hover">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Gran Premio</th>
-          <th>Carrera</th>
-          <th>Deadline</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in events %}
-        <tr>
-          <td>{{ e.gp.round }}</td>
-          <td>
-            <strong>{{ e.gp.name }}</strong>
-            {% if e.gp.circuit %}<br><small class="text-secondary">{{ e.gp.circuit }}</small>{% endif %}
-          </td>
-          <td>
-            {% if e.race_start %}
-              {{ e.race_start|date:"d M Y H:i" }} UTC
+{% if events %}
+<div class="row g-3">
+  {% for event in events %}
+  <div class="col-12">
+    <div class="race-card">
+      <div class="d-flex race-card-content">
+        <!-- Left: Info -->
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-start gap-2 mb-2">
+            <span class="text-muted small">R{{ event.gp.round }}</span>
+            <h5 class="mb-0">{{ event.gp.name }}</h5>
+          </div>
+
+          <p class="text-muted small mb-2">{{ event.gp.country }} - {{ event.gp.circuit }}</p>
+
+          <!-- Race date -->
+          {% if event.race_start %}
+          <p class="small mb-2">
+            <span class="text-muted">Carrera:</span>
+            {{ event.race_start|date:"d M Y, H:i" }} UTC
+          </p>
+          {% endif %}
+
+          <!-- Deadline -->
+          {% if event.deadline %}
+          <p class="small mb-3">
+            <span class="text-muted">Deadline:</span>
+            {{ event.deadline|date:"d M Y, H:i" }} UTC
+          </p>
+          {% endif %}
+
+          <!-- Badges -->
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% if event.status == "OPEN" %}
+            <span class="badge-pixel badge-open">ABIERTO</span>
             {% else %}
-              <span class="text-secondary">TBD</span>
+            <span class="badge-pixel badge-closed">CERRADO</span>
             {% endif %}
-          </td>
-          <td>
-            {% if e.deadline %}
-              {{ e.deadline|date:"d M Y H:i" }} UTC
-            {% else %}
-              <span class="text-secondary">-</span>
+
+            {% if user.is_authenticated %}
+              {% if event.has_pick %}
+              <span class="badge-pixel badge-pick-done">PICK HECHO</span>
+              {% elif event.status == "OPEN" %}
+              <span class="badge-pixel badge-pick-pending">PENDIENTE</span>
+              {% endif %}
             {% endif %}
-          </td>
-          <td>
-            {% if e.status == "OPEN" %}
-              <span class="badge bg-success">OPEN</span>
-            {% else %}
-              <span class="badge bg-secondary">CLOSED</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'predictions:race_detail' event.gp.slug %}" class="btn btn-sm btn-outline-light">
+              Ver detalle
+            </a>
+            {% if event.status == "OPEN" and user.is_authenticated %}
+            <a href="{% url 'predictions:pick' event.gp.slug %}" class="btn btn-sm btn-warning">
+              {% if event.has_pick %}Editar pick{% else %}Hacer pick{% endif %}
+            </a>
             {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-center text-secondary">No hay carreras cargadas.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+        </div>
+
+        <!-- Right: Track image -->
+        <div class="race-card-track ms-3" style="width: 180px; flex-shrink: 0;">
+          {% circuit_slot event.gp.slug "" %}
+        </div>
+      </div>
+    </div>
   </div>
+  {% endfor %}
 </div>
+{% else %}
+<div class="pixel-box text-center py-5">
+  <p class="text-muted mb-0">No hay carreras en el calendario</p>
+</div>
+{% endif %}
 {% endblock %}

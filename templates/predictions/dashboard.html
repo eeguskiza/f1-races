@@ -1,54 +1,156 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load circuit_tags %}
 {% block title %}Dashboard - F1 Porras{% endblock %}
 
 {% block content %}
+<h1 class="pixel-title mb-4">Hola, {{ user.username }}</h1>
+
 <div class="row g-4">
-  <div class="col-lg-6">
-    <div class="card card-dark p-4 h-100">
-      <h2 class="pixel-title mb-3">Mis Puntos</h2>
-      <div class="display-4 fw-bold text-warning">{{ total_points }}</div>
-      <p class="text-secondary mt-2">puntos acumulados</p>
+  <!-- Left column: Stats + Recent predictions -->
+  <div class="col-lg-7">
+    <!-- Total score -->
+    <div class="card-dark p-4 mb-4">
+      <div class="row align-items-center">
+        <div class="col">
+          <p class="text-muted mb-1">Tu puntuacion total</p>
+          <h2 class="pixel-title text-accent mb-0">{{ total_points }} PTS</h2>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'predictions:leaderboard' %}" class="btn btn-outline-light btn-sm">
+            Ver ranking
+          </a>
+        </div>
+      </div>
     </div>
+
+    <!-- Quick links -->
+    <div class="row g-3 mb-4">
+      <div class="col-6">
+        <a href="{% url 'predictions:races' %}" class="quick-link">
+          <p class="pixel-title-sm mb-1">CALENDARIO</p>
+          <p class="text-muted small mb-0">Ver todas las carreras</p>
+        </a>
+      </div>
+      <div class="col-6">
+        <a href="{% url 'predictions:leaderboard' %}" class="quick-link">
+          <p class="pixel-title-sm mb-1">LEADERBOARD</p>
+          <p class="text-muted small mb-0">Ranking de jugadores</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent predictions -->
+    <h3 class="pixel-title-sm mb-3">MIS ULTIMAS PREDICCIONES</h3>
+    {% if recent_predictions %}
+    <div class="card-dark">
+      <div class="table-responsive">
+        <table class="table table-dark mb-0 session-table">
+          <thead>
+            <tr>
+              <th>GP</th>
+              <th>Estado</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pred in recent_predictions %}
+            <tr>
+              <td>
+                <a href="{% url 'predictions:race_detail' pred.event.slug %}" class="text-light text-decoration-none">
+                  {{ pred.event.name }}
+                </a>
+              </td>
+              <td>
+                {% if pred.event.is_locked %}
+                <span class="status-badge status-closed">CERRADO</span>
+                {% else %}
+                <span class="status-badge status-open">ABIERTO</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if pred.score is not None %}
+                <span class="text-accent">{{ pred.score }} pts</span>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="pixel-box text-center py-4">
+      <p class="text-muted mb-0">No has hecho ninguna prediccion todavia</p>
+      <p class="small text-muted mt-2">Ve al calendario y haz tu primer pick</p>
+    </div>
+    {% endif %}
   </div>
 
-  <div class="col-lg-6">
-    <div class="card card-dark p-4 h-100">
-      <h2 class="pixel-title mb-3">Proxima Carrera</h2>
+  <!-- Right column: Next race -->
+  <div class="col-lg-5">
+    <h3 class="pixel-title-sm mb-3">PROXIMA CARRERA</h3>
 
-      {% if next_event %}
-        <div class="fw-semibold fs-5">{{ next_event.name }}</div>
-        <p class="text-secondary mb-3">
-          {% if next_event.race_start_utc %}
-            {{ next_event.race_start_utc|date:"d M Y H:i" }} UTC
-          {% endif %}
-        </p>
+    {% if next_event %}
+    <div class="highlight-box">
+      <h4 class="mb-2">{{ next_event.name }}</h4>
+      <p class="text-muted mb-2">{{ next_event.country }} - {{ next_event.circuit }}</p>
 
+      <!-- Status badge -->
+      <div class="mb-3">
         {% if next_event.is_locked %}
-          <span class="badge bg-secondary mb-2">Predicciones cerradas</span>
+        <span class="badge-pixel badge-closed">CERRADO</span>
         {% else %}
-          <span class="badge bg-success mb-2">Predicciones abiertas</span>
-          <p class="small text-secondary">
-            Cierre: {{ next_event.deadline_utc|date:"d M Y H:i" }} UTC
-          </p>
+        <span class="badge-pixel badge-open">ABIERTO</span>
         {% endif %}
+      </div>
 
-        <hr class="border-secondary">
+      <!-- Deadline -->
+      {% if next_event.deadline_utc %}
+      <p class="small mb-3">
+        <span class="text-muted">Deadline:</span>
+        {{ next_event.deadline_utc|date:"d M Y, H:i" }} UTC
+      </p>
+      {% endif %}
 
-        {% if user_prediction %}
-          <div class="text-success">Tu prediccion esta registrada</div>
-          <small class="text-secondary">
-            Top5: {{ user_prediction.p1.code }}, {{ user_prediction.p2.code }},
-            {{ user_prediction.p3.code }}, {{ user_prediction.p4.code }}, {{ user_prediction.p5.code }}
-            | Alonso: P{{ user_prediction.alonso_pos_guess }}
-          </small>
-        {% else %}
-          <div class="text-warning">No has hecho prediccion</div>
-        {% endif %}
+      <!-- Track slot -->
+      {% circuit_slot next_event.slug "mb-3" %}
 
+      <!-- User prediction status -->
+      {% if user_prediction %}
+      <div class="prediction-summary mb-3">
+        <p class="small text-muted mb-2">Tu prediccion:</p>
+        <div class="mb-2">
+          <span class="driver-chip">P1: {{ user_prediction.p1.code }}</span>
+          <span class="driver-chip">P2: {{ user_prediction.p2.code }}</span>
+          <span class="driver-chip">P3: {{ user_prediction.p3.code }}</span>
+          <span class="driver-chip">P4: {{ user_prediction.p4.code }}</span>
+          <span class="driver-chip">P5: {{ user_prediction.p5.code }}</span>
+        </div>
+        <p class="small mb-0">
+          Alonso:
+          {% if user_prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.alonso_pos_guess }}{% endif %}
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- Action button -->
+      {% if not next_event.is_locked %}
+      <a href="{% url 'predictions:pick' next_event.slug %}" class="btn btn-warning w-100">
+        {% if user_prediction %}Editar mi pick{% else %}Hacer mi pick{% endif %}
+      </a>
       {% else %}
-        <p class="text-secondary">No hay carreras pendientes.</p>
+      <a href="{% url 'predictions:race_detail' next_event.slug %}" class="btn btn-outline-light w-100">
+        Ver detalle
+      </a>
       {% endif %}
     </div>
+    {% else %}
+    <div class="pixel-box text-center py-4">
+      <p class="text-muted mb-0">No hay proxima carrera programada</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

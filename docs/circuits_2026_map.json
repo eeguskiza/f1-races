@@ -1,0 +1,145 @@
+{
+  "_comment": "Maps our Race.slug to source circuit SVG file from julesr0y/f1-circuits-svg",
+  "_source_repo": "https://github.com/julesr0y/f1-circuits-svg",
+  "_license": "MIT",
+  "circuits": {
+    "australia-gp": {
+      "source_id": "melbourne",
+      "layout": "melbourne-2",
+      "svg_file": "melbourne-2.svg",
+      "notes": "Albert Park - 2022-2026 layout"
+    },
+    "china-gp": {
+      "source_id": "shanghai",
+      "layout": "shanghai-1",
+      "svg_file": "shanghai-1.svg",
+      "notes": "Shanghai International Circuit"
+    },
+    "japan-gp": {
+      "source_id": "suzuka",
+      "layout": "suzuka-2",
+      "svg_file": "suzuka-2.svg",
+      "notes": "Suzuka - 2003+ layout"
+    },
+    "bahrain-gp": {
+      "source_id": "bahrain",
+      "layout": "bahrain-1",
+      "svg_file": "bahrain-1.svg",
+      "notes": "Sakhir - standard layout (not outer)"
+    },
+    "saudi-gp": {
+      "source_id": "jeddah",
+      "layout": "jeddah-1",
+      "svg_file": "jeddah-1.svg",
+      "notes": "Jeddah Corniche Circuit"
+    },
+    "miami-gp": {
+      "source_id": "miami",
+      "layout": "miami-1",
+      "svg_file": "miami-1.svg",
+      "notes": "Miami International Autodrome"
+    },
+    "canada-gp": {
+      "source_id": "montreal",
+      "layout": "montreal-6",
+      "svg_file": "montreal-6.svg",
+      "notes": "Circuit Gilles Villeneuve - 2002+ layout"
+    },
+    "monaco-gp": {
+      "source_id": "monaco",
+      "layout": "monaco-5",
+      "svg_file": "monaco-5.svg",
+      "notes": "Monte Carlo - 2003+ layout"
+    },
+    "spain-gp": {
+      "source_id": "catalunya",
+      "layout": "catalunya-6",
+      "svg_file": "catalunya-6.svg",
+      "notes": "Barcelona-Catalunya - 2023+ layout (chicane removed)"
+    },
+    "austria-gp": {
+      "source_id": "spielberg",
+      "layout": "spielberg-3",
+      "svg_file": "spielberg-3.svg",
+      "notes": "Red Bull Ring - 2014+ layout"
+    },
+    "britain-gp": {
+      "source_id": "silverstone",
+      "layout": "silverstone-8",
+      "svg_file": "silverstone-8.svg",
+      "notes": "Silverstone - 2010+ Arena layout"
+    },
+    "belgium-gp": {
+      "source_id": "spa-francorchamps",
+      "layout": "spa-francorchamps-4",
+      "svg_file": "spa-francorchamps-4.svg",
+      "notes": "Spa - 2007+ layout"
+    },
+    "hungary-gp": {
+      "source_id": "hungaroring",
+      "layout": "hungaroring-3",
+      "svg_file": "hungaroring-3.svg",
+      "notes": "Hungaroring - 2003+ layout"
+    },
+    "netherlands-gp": {
+      "source_id": "zandvoort",
+      "layout": "zandvoort-5",
+      "svg_file": "zandvoort-5.svg",
+      "notes": "Zandvoort - 2021+ layout with banked turns"
+    },
+    "italy-gp": {
+      "source_id": "monza",
+      "layout": "monza-6",
+      "svg_file": "monza-6.svg",
+      "notes": "Monza - 2000+ layout"
+    },
+    "azerbaijan-gp": {
+      "source_id": "baku",
+      "layout": "baku-1",
+      "svg_file": "baku-1.svg",
+      "notes": "Baku City Circuit"
+    },
+    "singapore-gp": {
+      "source_id": "marina-bay",
+      "layout": "marina-bay-4",
+      "svg_file": "marina-bay-4.svg",
+      "notes": "Marina Bay - 2023+ shortened layout"
+    },
+    "usa-gp": {
+      "source_id": "austin",
+      "layout": "austin-1",
+      "svg_file": "austin-1.svg",
+      "notes": "Circuit of the Americas (COTA)"
+    },
+    "mexico-gp": {
+      "source_id": "mexico-city",
+      "layout": "mexico-city-3",
+      "svg_file": "mexico-city-3.svg",
+      "notes": "Autodromo Hermanos Rodriguez - 2015+ layout"
+    },
+    "brazil-gp": {
+      "source_id": "interlagos",
+      "layout": "interlagos-2",
+      "svg_file": "interlagos-2.svg",
+      "notes": "Interlagos - 1990+ layout"
+    },
+    "vegas-gp": {
+      "source_id": "las-vegas",
+      "layout": "las-vegas-1",
+      "svg_file": "las-vegas-1.svg",
+      "notes": "Las Vegas Strip Circuit (not Caesars Palace)"
+    },
+    "qatar-gp": {
+      "source_id": "lusail",
+      "layout": "lusail-1",
+      "svg_file": "lusail-1.svg",
+      "notes": "Lusail International Circuit"
+    },
+    "abudhabi-gp": {
+      "source_id": "yas-marina",
+      "layout": "yas-marina-2",
+      "svg_file": "yas-marina-2.svg",
+      "notes": "Yas Marina - 2021+ redesigned layout"
+    }
+  }
+}

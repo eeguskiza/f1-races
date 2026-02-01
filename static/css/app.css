@@ -4,13 +4,18 @@
   --line: #2a3444;
   --txt: #e5e7eb;
   --muted: #9ca3af;
+  --accent: #f59e0b;
+  --open: #22c55e;
+  --closed: #ef4444;
 }
 
 body{
   background: radial-gradient(1200px 600px at 20% 10%, #131c2f 0%, var(--bg) 55%);
   color: var(--txt);
+  min-height: 100vh;
 }
 
+/* Cards */
 .card-dark{
   background: rgba(17,24,39,0.9);
   border: 1px solid var(--line);
@@ -18,12 +23,21 @@ body{
   box-shadow: 0 12px 30px rgba(0,0,0,0.35);
 }
 
+/* Pixel titles */
 .pixel-title{
   font-family: "Press Start 2P", system-ui, sans-serif;
   letter-spacing: 0.5px;
   line-height: 1.35;
 }
 
+.pixel-title-sm{
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+/* Pixel box for emphasis */
 .pixel-box{
   border: 2px solid var(--line);
   border-radius: 10px;
@@ -31,6 +45,14 @@ body{
   background: rgba(0,0,0,0.25);
 }
 
+.pixel-box-accent{
+  border: 2px dashed var(--accent);
+  border-radius: 10px;
+  padding: 16px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* Grid placeholder for images */
 .pixel-placeholder{
   height: 220px;
   border-radius: 12px;
@@ -40,3 +62,294 @@ body{
     linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 18px 18px;
 }
+
+/* Track slot for circuit images */
+.track-slot{
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  border: 2px dashed var(--line);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    rgba(0,0,0,0.2);
+  background-size: 12px 12px, 12px 12px, 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow: hidden;
+}
+
+.track-slot img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.track-slot-lg{
+  min-height: 200px;
+}
+
+/* Pixel badges */
+.badge-pixel{
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.5rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-open{
+  color: var(--open);
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--open);
+}
+
+.badge-closed{
+  color: var(--closed);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--closed);
+}
+
+.badge-pick-done{
+  color: var(--open);
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--open);
+}
+
+.badge-pick-pending{
+  color: var(--accent);
+  background: rgba(245, 158, 11, 0.1);
+  border-color: var(--accent);
+}
+
+/* Status badges (simpler) */
+.status-badge{
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.status-open{
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--open);
+}
+
+.status-closed{
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--closed);
+}
+
+/* Race cards */
+.race-card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.race-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* News cards */
+.news-card{
+  background: rgba(17,24,39,0.7);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+/* Countdown / highlight box */
+.highlight-box{
+  background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.02) 100%);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* Session table */
+.session-table{
+  font-size: 0.9rem;
+}
+
+.session-table th{
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--line);
+}
+
+.session-table td{
+  border-bottom: 1px solid var(--line);
+  padding: 0.6rem 0;
+}
+
+/* Prediction summary */
+.prediction-summary{
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.driver-chip{
+  display: inline-block;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  margin: 2px;
+}
+
+/* Form styling */
+.form-select, .form-control{
+  background-color: var(--card);
+  border-color: var(--line);
+  color: var(--txt);
+}
+
+.form-select:focus, .form-control:focus{
+  background-color: var(--card);
+  border-color: var(--accent);
+  color: var(--txt);
+  box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+}
+
+.form-select option{
+  background-color: var(--card);
+  color: var(--txt);
+}
+
+.form-label{
+  font-weight: 500;
+  color: var(--txt);
+}
+
+/* Leaderboard table */
+.leaderboard-table{
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.leaderboard-table thead th{
+  background: rgba(0,0,0,0.3);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  border: none;
+}
+
+.leaderboard-table tbody td{
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.leaderboard-table tbody tr:last-child td{
+  border-bottom: none;
+}
+
+.rank-badge{
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.rank-1{ background: linear-gradient(135deg, #ffd700, #ffb700); color: #000; }
+.rank-2{ background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #000; }
+.rank-3{ background: linear-gradient(135deg, #cd7f32, #b56d2a); color: #fff; }
+.rank-other{ background: var(--line); color: var(--txt); }
+
+/* Quick links */
+.quick-link{
+  display: block;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--txt);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.quick-link:hover{
+  border-color: var(--accent);
+  color: var(--txt);
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pixel-title{
+    font-size: 0.9rem;
+  }
+
+  .pixel-title-sm{
+    font-size: 0.6rem;
+  }
+
+  .badge-pixel{
+    font-size: 0.45rem;
+    padding: 4px 6px;
+  }
+
+  .track-slot{
+    aspect-ratio: 4 / 3;
+    min-height: 120px;
+  }
+
+  .race-card{
+    padding: 0.75rem;
+  }
+
+  .navbar-brand.pixel-title{
+    font-size: 0.75rem;
+  }
+
+  /* Stack race card content on mobile */
+  .race-card-content{
+    flex-direction: column !important;
+  }
+
+  .race-card-track{
+    width: 100% !important;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .pixel-title{
+    font-size: 0.75rem;
+  }
+
+  .container{
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .highlight-box{
+    padding: 1rem;
+  }
+}
+
+/* Utility classes */
+.text-accent{ color: var(--accent); }
+.text-open{ color: var(--open); }
+.text-closed{ color: var(--closed); }
+.border-accent{ border-color: var(--accent) !important; }

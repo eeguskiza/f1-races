@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Pick - {{ gp.name }} - F1 Porras{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{% url 'predictions:race_detail' gp.slug %}" class="btn btn-sm btn-outline-secondary">&larr; {{ gp.name }}</a>
+</div>
+
+{% if locked %}
+<!-- Locked state -->
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="pixel-box text-center py-5">
+      <h2 class="pixel-title text-closed mb-4">CERRADO</h2>
+      <p class="text-muted mb-3">Las predicciones para este GP estan cerradas</p>
+      {% if gp.deadline_utc %}
+      <p class="small text-muted mb-4">
+        Deadline: {{ gp.deadline_utc|date:"d M Y, H:i" }} UTC
+      </p>
+      {% endif %}
+      <a href="{% url 'predictions:race_detail' gp.slug %}" class="btn btn-outline-light">
+        Ver detalle del GP
+      </a>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- Open state - Form -->
+<h1 class="pixel-title mb-2">{% if prediction %}EDITAR{% else %}HACER{% endif %} PICK</h1>
+<p class="text-muted mb-4">{{ gp.name }} - {{ gp.country }}</p>
+
+<div class="row g-4">
+  <!-- Left: Form -->
+  <div class="col-lg-7">
+    <div class="card-dark p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-4">
+          {% for error in form.non_field_errors %}
+          <p class="mb-0">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <h4 class="pixel-title-sm mb-3">TOP 5 PREDICCION</h4>
+        <p class="text-muted small mb-4">Selecciona los pilotos que crees que terminaran en el Top 5</p>
+
+        <div class="row g-3 mb-4">
+          {% for field in form %}
+            {% if field.name != "alonso_pos_guess" %}
+            <div class="col-md-6">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+              <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+              {% endif %}
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <h4 class="pixel-title-sm mb-3">POSICION ALONSO</h4>
+        <p class="text-muted small mb-3">En que posicion crees que terminara Fernando Alonso?</p>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="{{ form.alonso_pos_guess.id_for_label }}" class="form-label">
+              {{ form.alonso_pos_guess.label }}
+            </label>
+            {{ form.alonso_pos_guess }}
+            {% if form.alonso_pos_guess.errors %}
+            <div class="text-danger small mt-1">{{ form.alonso_pos_guess.errors.0 }}</div>
+            {% endif %}
+            <p class="text-muted small mt-2">0 = DNF (abandono)</p>
+          </div>
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn btn-warning btn-lg">
+            Guardar pick
+          </button>
+          <a href="{% url 'predictions:race_detail' gp.slug %}" class="btn btn-outline-secondary btn-lg">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right: Summary / Info -->
+  <div class="col-lg-5">
+    <!-- Deadline reminder -->
+    <div class="pixel-box-accent mb-4">
+      <p class="small text-muted mb-1">Deadline:</p>
+      <p class="text-accent mb-0">{{ gp.deadline_utc|date:"d M Y, H:i" }} UTC</p>
+    </div>
+
+    <!-- Current pick summary (if editing) -->
+    {% if prediction %}
+    <div class="prediction-summary mb-4">
+      <h5 class="pixel-title-sm mb-3">PICK ACTUAL</h5>
+      <div class="mb-2">
+        <span class="driver-chip">P1: {{ prediction.p1.code }}</span>
+        <span class="driver-chip">P2: {{ prediction.p2.code }}</span>
+        <span class="driver-chip">P3: {{ prediction.p3.code }}</span>
+        <span class="driver-chip">P4: {{ prediction.p4.code }}</span>
+        <span class="driver-chip">P5: {{ prediction.p5.code }}</span>
+      </div>
+      <p class="small mb-0">
+        Alonso:
+        {% if prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ prediction.alonso_pos_guess }}{% endif %}
+      </p>
+      <p class="small text-muted mt-2 mb-0">
+        Enviado: {{ prediction.submitted_at|date:"d M Y, H:i" }}
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- Tips -->
+    <div class="pixel-box">
+      <h5 class="pixel-title-sm mb-3">REGLAS</h5>
+      <ul class="small text-muted mb-0 ps-3">
+        <li class="mb-2">No puedes repetir pilotos en el Top 5</li>
+        <li class="mb-2">Puedes editar tu pick hasta el deadline</li>
+        <li class="mb-2">Solo se permite una prediccion por carrera</li>
+        <li>Posicion Alonso: 0 = DNF, 1-20 = posicion final</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
