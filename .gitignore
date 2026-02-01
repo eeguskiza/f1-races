@@ -1,0 +1,13 @@
+# venv
+f1/
+.venv/
+venv/
+
+# python
+__pycache__/
+*.pyc
+
+# django
+db.sqlite3
+.env
+staticfiles/
