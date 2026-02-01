@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}F1 Porras{% endblock %}
+
+{% block content %}
+<div class="row g-4 align-items-stretch">
+  <div class="col-lg-7">
+    <div class="card card-dark p-4 h-100">
+      <h1 class="pixel-title mb-3">Temporada 2026</h1>
+      <p class="text-secondary mb-4">
+        Predice el <b>Top 5</b> y la <b>posición de Alonso</b>. Cierre: <b>antes de FP3</b>.
+      </p>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-warning" href="#">Hacer mi predicción</a>
+        <a class="btn btn-outline-light" href="#">Leaderboard</a>
+        <a class="btn btn-outline-secondary" href="#">Calendario</a>
+      </div>
+
+      <div class="mt-4 pixel-box">
+        <div class="small text-secondary">⚡ Próxima carrera (placeholder)</div>
+        <div class="fw-semibold">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card card-dark p-4 h-100">
+      <h2 class="pixel-title mb-3">Pixel vibe</h2>
+      <p class="text-secondary">
+        Aquí irá el circuito pixelado + overlay de coche/driver normal.
+      </p>
+      <div class="pixel-placeholder mt-2"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
