@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: f1-races
+    env: python
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application
