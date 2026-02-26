@@ -45,7 +45,7 @@ class PredictionForm(forms.ModelForm):
 
     class Meta:
         model = Prediction
-        fields = ["p1", "p2", "p3", "p4", "p5", "alonso_pos_guess"]
+        fields = ["p1", "p2", "p3", "p4", "p5", "alonso_pos_guess", "sainz_pos_guess"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,11 +65,17 @@ class PredictionForm(forms.ModelForm):
             )
             self.fields[field_name].empty_label = None
 
-        # Alonso position field (0=DNF, 1-20)
-        alonso_choices = [(0, "DNF")] + [(i, str(i)) for i in range(1, 21)]
+        pos_choices = [(0, "DNF")] + [(i, str(i)) for i in range(1, 21)]
+
         self.fields["alonso_pos_guess"] = forms.ChoiceField(
-            choices=alonso_choices,
+            choices=pos_choices,
             label="Posicion de Alonso",
+            widget=forms.Select(attrs={"class": "form-select"}),
+        )
+
+        self.fields["sainz_pos_guess"] = forms.ChoiceField(
+            choices=pos_choices,
+            label="Posicion de Sainz",
             widget=forms.Select(attrs={"class": "form-select"}),
         )
 

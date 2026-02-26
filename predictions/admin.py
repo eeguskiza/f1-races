@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib import messages
 from .models import Team, Driver, GrandPrix, Session, Prediction, NewsPost
 
 
@@ -22,12 +23,37 @@ class SessionInline(admin.TabularInline):
     ordering = ["order"]
 
 
+def calculate_scores(modeladmin, request, queryset):
+    """Admin action: calculate scores for all predictions of selected GPs."""
+    updated = 0
+    skipped = 0
+    for gp in queryset:
+        if not gp.has_results:
+            skipped += 1
+            continue
+        predictions = Prediction.objects.filter(event=gp).select_related(
+            "p1", "p2", "p3", "p4", "p5", "event"
+        )
+        for pred in predictions:
+            pred.score = pred.calculate_score()
+            pred.save(skip_lock_check=True)
+            updated += 1
+
+    if updated:
+        messages.success(request, f"Puntuaciones calculadas: {updated} predicciones actualizadas.")
+    if skipped:
+        messages.warning(request, f"{skipped} GP(s) sin resultados completos — omitidos.")
+
+calculate_scores.short_description = "Calcular puntuaciones"
+
+
 @admin.register(GrandPrix)
 class GrandPrixAdmin(admin.ModelAdmin):
     list_display = ["round", "name", "country", "season_year", "is_locked", "has_results"]
     list_filter = ["season_year"]
     prepopulated_fields = {"slug": ("name",)}
     inlines = [SessionInline]
+    actions = [calculate_scores]
 
 
 @admin.register(Session)

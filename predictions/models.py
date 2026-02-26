@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
+# F1 championship points by finishing position
+F1_POINTS = {1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1}
+
 
 class Team(models.Model):
     name = models.CharField(max_length=80)
@@ -48,6 +51,7 @@ class GrandPrix(models.Model):
     result_p4 = models.ForeignKey(Driver, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     result_p5 = models.ForeignKey(Driver, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     result_alonso_pos = models.IntegerField(null=True, blank=True)
+    result_sainz_pos = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["season_year", "round"]
@@ -89,7 +93,7 @@ class GrandPrix(models.Model):
         return all([
             self.result_p1, self.result_p2, self.result_p3,
             self.result_p4, self.result_p5
-        ]) and self.result_alonso_pos is not None
+        ]) and self.result_alonso_pos is not None and self.result_sainz_pos is not None
 
 
 class Session(models.Model):
@@ -131,6 +135,7 @@ class Prediction(models.Model):
     p5 = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name="+")
 
     alonso_pos_guess = models.IntegerField()  # 0=DNF, 1-20
+    sainz_pos_guess = models.IntegerField(default=0)  # 0=DNF, 1-20
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -155,9 +160,62 @@ class Prediction(models.Model):
         if self.alonso_pos_guess < 0 or self.alonso_pos_guess > 20:
             raise ValidationError("Posición Alonso inválida (0=DNF, 1-20).")
 
-        # Validate deadline
-        if self.event.is_locked:
+        # Validate sainz position
+        if self.sainz_pos_guess < 0 or self.sainz_pos_guess > 20:
+            raise ValidationError("Posición Sainz inválida (0=DNF, 1-20).")
+
+        # Validate deadline (event may not be set yet during form validation)
+        if self.event_id is not None and self.event.is_locked:
             raise ValidationError("Las predicciones están cerradas para este GP.")
+
+    def calculate_score(self) -> int:
+        """Calculate score based on GP results. GP must have results set."""
+        gp = self.event
+        if not gp.has_results:
+            return 0
+
+        score = 0
+
+        # Map finishing position -> driver for top 5
+        result_map = {
+            1: gp.result_p1_id,
+            2: gp.result_p2_id,
+            3: gp.result_p3_id,
+            4: gp.result_p4_id,
+            5: gp.result_p5_id,
+        }
+        # Map driver -> finishing position (for half-points lookup)
+        driver_to_pos = {drv_id: pos for pos, drv_id in result_map.items()}
+
+        # Top 5 scoring
+        for pos in range(1, 6):
+            predicted_id = getattr(self, f"p{pos}_id")
+            actual_pos = driver_to_pos.get(predicted_id)
+            if actual_pos is None:
+                continue
+            real_pts = F1_POINTS[actual_pos]
+            if actual_pos == pos:
+                score += real_pts          # exact hit
+            else:
+                score += real_pts // 2    # right driver, wrong slot
+
+        # Alonso scoring
+        if gp.result_alonso_pos is not None:
+            alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
+            if self.alonso_pos_guess == gp.result_alonso_pos:
+                score += alonso_pts * 2
+            elif gp.result_alonso_pos <= 10:
+                score += alonso_pts
+
+        # Sainz scoring (same rules)
+        if gp.result_sainz_pos is not None:
+            sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
+            if self.sainz_pos_guess == gp.result_sainz_pos:
+                score += sainz_pts * 2
+            elif gp.result_sainz_pos <= 10:
+                score += sainz_pts
+
+        return score
 
     def save(self, *args, **kwargs):
         # Skip deadline check if updating score only

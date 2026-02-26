@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,6 +7,8 @@ from django.utils import timezone
 
 from .models import GrandPrix, Prediction, NewsPost, Driver
 from .forms import PredictionForm, SignupForm
+
+User = get_user_model()
 
 
 def home(request):
@@ -166,6 +168,7 @@ def pick(request, slug):
             pred.user = request.user
             pred.event = gp
             pred.alonso_pos_guess = int(form.cleaned_data["alonso_pos_guess"])
+            pred.sainz_pos_guess = int(form.cleaned_data["sainz_pos_guess"])
             try:
                 pred.save()
                 messages.success(request, f"Pick guardado para {gp.name}")
@@ -184,28 +187,29 @@ def pick(request, slug):
 
 
 def leaderboard(request):
-    """Leaderboard ranking by total points."""
-    # Get users with their total scores and prediction counts
-    users_data = []
-
-    # Get all users who have predictions
-    user_stats = (
-        Prediction.objects.values("user_id", "user__username")
-        .annotate(
+    """Leaderboard ranking by total points. Shows all registered users."""
+    # Aggregate scores per user (only users who have predictions)
+    stats_by_user = {
+        row["user_id"]: row
+        for row in Prediction.objects.values("user_id").annotate(
             total_score=Sum("score"),
             picks_count=Count("id"),
         )
-        .order_by("-total_score")
-    )
+    }
 
-    for stats in user_stats:
+    # Build list for ALL registered users
+    users_data = []
+    for user in User.objects.all().order_by("username"):
+        stats = stats_by_user.get(user.pk)
         users_data.append({
-            "username": stats["user__username"],
-            "total_score": stats["total_score"] or 0,
-            "picks_count": stats["picks_count"],
+            "username": user.username,
+            "total_score": stats["total_score"] or 0 if stats else 0,
+            "picks_count": stats["picks_count"] if stats else 0,
         })
 
-    # Total races count
+    # Sort by total_score desc, then username asc
+    users_data.sort(key=lambda x: (-x["total_score"], x["username"]))
+
     total_races = GrandPrix.objects.count()
 
     return render(request, "predictions/leaderboard.html", {

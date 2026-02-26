@@ -129,8 +129,9 @@
           <span class="driver-chip">P5: {{ user_prediction.p5.code }}</span>
         </div>
         <p class="small mb-0">
-          Alonso:
-          {% if user_prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.alonso_pos_guess }}{% endif %}
+          Alonso: {% if user_prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.alonso_pos_guess }}{% endif %}
+          &nbsp;|&nbsp;
+          Sainz: {% if user_prediction.sainz_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.sainz_pos_guess }}{% endif %}
         </p>
       </div>
       {% endif %}
