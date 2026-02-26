@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}{% if gp %}{{ gp.name }}{% else %}Porras{% endif %} - F1 Porras{% endblock %}
+
+{% block content %}
+
+{% if not gp %}
+<div class="pixel-box text-center py-5">
+  <p class="text-muted mb-0">No hay carreras disponibles</p>
+</div>
+
+{% else %}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="pixel-title mb-1">{{ gp.name|upper }}</h1>
+    <p class="text-muted mb-0">{{ gp.country }}{% if gp.circuit %} · {{ gp.circuit }}{% endif %}</p>
+  </div>
+  <div class="text-end">
+    {% if gp.is_locked %}
+    <span class="badge-pixel badge-closed">CERRADO</span>
+    {% else %}
+    <span class="badge-pixel badge-open">ABIERTO</span>
+    {% endif %}
+    {% if gp.race_start_utc %}
+    <p class="text-muted small mt-1 mb-0">Carrera: {{ gp.race_start_utc|date:"d M Y, H:i" }} UTC</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if not gp.is_locked and gp.deadline_utc %}
+<div class="card-dark p-4 mb-4 text-center">
+  <p class="text-muted small mb-2">Las porras se revelan cuando cierre el plazo</p>
+  <p class="pixel-title mb-0" id="countdown" style="font-size:2rem;">--:--:--</p>
+</div>
+<script>
+(function(){
+  var deadline = new Date("{{ gp.deadline_utc|date:'Y-m-d' }}T{{ gp.deadline_utc|date:'H:i:s' }}Z");
+  function tick(){
+    var diff = deadline - new Date();
+    if(diff <= 0){ document.getElementById('countdown').textContent = 'CERRADO'; return; }
+    var d = Math.floor(diff/86400000);
+    var h = Math.floor((diff%86400000)/3600000);
+    var m = Math.floor((diff%3600000)/60000);
+    var s = Math.floor((diff%60000)/1000);
+    var txt = (d > 0 ? d + 'd ' : '') +
+              String(h).padStart(2,'0') + ':' +
+              String(m).padStart(2,'0') + ':' +
+              String(s).padStart(2,'0');
+    document.getElementById('countdown').textContent = txt;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
+{% endif %}
+
+{% if picks %}
+<div class="card-dark">
+  <div class="table-responsive">
+    <table class="table table-dark mb-0">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th class="text-center">P1</th>
+          <th class="text-center">P2</th>
+          <th class="text-center">P3</th>
+          <th class="text-center">P4</th>
+          <th class="text-center">P5</th>
+          <th class="text-center">ALO</th>
+          <th class="text-center">SAI</th>
+          {% if gp.has_results %}
+          <th class="text-end">Pts</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for pick in picks %}
+        <tr>
+          <td>
+            <span class="{% if user.username == pick.user.username %}text-accent{% endif %}">
+              {{ pick.user.username }}
+              {% if user.username == pick.user.username %}
+              <span class="text-muted small">(tu)</span>
+              {% endif %}
+            </span>
+          </td>
+
+          {% if gp.is_locked %}
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_p1 == pick.p1 %} chip-hit{% endif %}">{{ pick.p1.code }}</span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_p2 == pick.p2 %} chip-hit{% endif %}">{{ pick.p2.code }}</span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_p3 == pick.p3 %} chip-hit{% endif %}">{{ pick.p3.code }}</span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_p4 == pick.p4 %} chip-hit{% endif %}">{{ pick.p4.code }}</span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_p5 == pick.p5 %} chip-hit{% endif %}">{{ pick.p5.code }}</span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_alonso_pos == pick.alonso_pos_guess %} chip-hit{% endif %}">
+              {% if pick.alonso_pos_guess == 0 %}DNF{% else %}P{{ pick.alonso_pos_guess }}{% endif %}
+            </span>
+          </td>
+          <td class="text-center">
+            <span class="driver-chip{% if gp.result_sainz_pos == pick.sainz_pos_guess %} chip-hit{% endif %}">
+              {% if pick.sainz_pos_guess == 0 %}DNF{% else %}P{{ pick.sainz_pos_guess }}{% endif %}
+            </span>
+          </td>
+
+          {% else %}
+          <td colspan="7" class="text-center text-muted">
+            <span class="small fst-italic">se revela al cerrar el plazo</span>
+          </td>
+          {% endif %}
+
+          {% if gp.has_results %}
+          <td class="text-end">
+            {% if pick.score is not None %}
+            <span class="text-accent pixel-title-sm">{{ pick.score }}</span>
+            {% else %}
+            <span class="text-muted small">-</span>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="text-muted small mt-3">
+  Picks resaltados en verde = acierto exacto de posición.
+</p>
+
+{% else %}
+<div class="pixel-box text-center py-5">
+  <p class="text-muted mb-2">Nadie ha hecho su pick todavía para esta carrera</p>
+  {% if user.is_authenticated and not gp.is_locked %}
+  <a href="{% url 'predictions:pick' gp.slug %}" class="btn btn-warning btn-sm mt-2">Ser el primero</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -183,6 +185,41 @@ def pick(request, slug):
         "form": form,
         "prediction": prediction,
         "locked": False,
+    })
+
+
+def news_detail(request, pk):
+    post = get_object_or_404(NewsPost, pk=pk)
+    return render(request, "predictions/news_detail.html", {"post": post})
+
+
+def porras(request):
+    """Public board: all picks for the current/next race."""
+    now = timezone.now()
+
+    # Show current race until 48h after the GP, then switch to next one
+    gp = None
+    for g in GrandPrix.objects.prefetch_related("sessions").all():
+        race_start = g.race_start_utc
+        if race_start and race_start + timedelta(hours=48) > now:
+            gp = g
+            break
+
+    # If all races are done (season finished), show the last one
+    if gp is None:
+        gp = GrandPrix.objects.prefetch_related("sessions").last()
+
+    picks = []
+    if gp:
+        picks = (
+            Prediction.objects.filter(event=gp)
+            .select_related("user", "p1", "p2", "p3", "p4", "p5")
+            .order_by("user__username")
+        )
+
+    return render(request, "predictions/porras.html", {
+        "gp": gp,
+        "picks": picks,
     })
 
 

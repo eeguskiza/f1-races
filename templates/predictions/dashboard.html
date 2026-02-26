@@ -157,15 +157,17 @@
     {% if news %}
     <h3 class="pixel-title-sm mb-3 mt-4">NOTICIAS</h3>
     {% for post in news %}
+    <a href="{% url 'predictions:news_detail' post.pk %}" class="text-decoration-none">
     <div class="news-card mb-3">
       {% if post.image_url %}
       <div class="news-image-wrapper mb-2">
         <img src="{{ post.image_url }}" alt="{{ post.title }}" class="news-image" loading="lazy">
       </div>
       {% endif %}
-      <h6 class="mb-1">{{ post.title }}</h6>
+      <h6 class="mb-1 text-light">{{ post.title }}</h6>
       <p class="text-muted small mb-0">{{ post.body|truncatewords:20 }}</p>
     </div>
+    </a>
     {% endfor %}
     {% endif %}
   </div>

@@ -50,7 +50,7 @@
 
         <div class="row g-3 mb-4">
           {% for field in form %}
-            {% if field.name != "alonso_pos_guess" %}
+            {% if field.name != "alonso_pos_guess" and field.name != "sainz_pos_guess" %}
             <div class="col-md-6">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
               {{ field }}

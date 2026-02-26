@@ -77,7 +77,7 @@ class GrandPrix(models.Model):
         """Predictions close 48h before FP1."""
         fp1 = self.fp1_start_utc
         if fp1:
-            return fp1 - timedelta(hours=48)
+            return fp1 - timedelta(hours=24)
         return None
 
     @property

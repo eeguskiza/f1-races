@@ -213,6 +213,12 @@ body{
   font-size: 0.85rem;
   margin: 2px;
 }
+.driver-chip.chip-hit{
+  background: rgba(0,200,100,0.15);
+  border-color: #00c864;
+  color: #00c864;
+  font-weight: bold;
+}
 
 /* Form styling */
 .form-select, .form-control{
