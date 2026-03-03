@@ -180,6 +180,400 @@ body{
   padding: 1.25rem;
 }
 
+.dashboard-hero,
+.leaderboard-hero{
+  background:
+    radial-gradient(circle at top right, rgba(245,158,11,0.18), transparent 35%),
+    linear-gradient(135deg, rgba(17,24,39,0.96), rgba(11,15,23,0.92));
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+}
+
+.dashboard-race-hero{
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(245,158,11,0.22), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(34,197,94,0.16), transparent 28%),
+    linear-gradient(135deg, rgba(17,24,39,0.96), rgba(11,15,23,0.95));
+  border: 1px solid rgba(245,158,11,0.22);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 42px rgba(0,0,0,0.32);
+  animation: dashboardGlow 9s ease-in-out infinite;
+}
+
+.dashboard-race-hero::before{
+  content: "";
+  position: absolute;
+  inset: -20% auto auto -10%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(245,158,11,0.18), transparent 65%);
+  pointer-events: none;
+  animation: dashboardOrb 12s ease-in-out infinite;
+}
+
+.dashboard-race-hero::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.05) 42%, transparent 56%),
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 160px 160px, 18px 18px, 18px 18px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.dashboard-race-copy,
+.dashboard-race-side{
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-kicker{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(147,197,253,0.2);
+  background: rgba(147,197,253,0.1);
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-deadline{
+  color: #f8d38a;
+  font-size: 0.95rem;
+}
+
+.dashboard-cta-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.dashboard-race-side{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dashboard-track-slot{
+  min-height: 240px;
+}
+
+.dashboard-track-slot img{
+  animation: dashboardFloat 8s ease-in-out infinite;
+}
+
+.dashboard-stat-strip{
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-stat-pill{
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(42,52,68,0.9);
+  background: rgba(11,15,23,0.45);
+  backdrop-filter: blur(6px);
+  transform: translateY(0);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.dashboard-stat-pill:hover{
+  transform: translateY(-2px);
+  border-color: rgba(245,158,11,0.32);
+}
+
+.dashboard-stat-pill strong{
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  color: var(--txt);
+}
+
+.dashboard-hero-copy{
+  max-width: 56ch;
+  color: #d7e5ff;
+}
+
+.dashboard-hero-panel,
+.dashboard-metric,
+.dashboard-side-panel,
+.dashboard-empty,
+.dashboard-feature-card{
+  background: rgba(17,24,39,0.84);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.dashboard-hero-panel,
+.dashboard-side-panel,
+.dashboard-empty{
+  padding: 1rem 1.1rem;
+}
+
+.dashboard-feature-card{
+  padding: 1.35rem;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+}
+
+.dashboard-telemetry-card{
+  background: rgba(17,24,39,0.88);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 1.35rem;
+  box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+}
+
+.dashboard-metric{
+  height: 100%;
+  padding: 1rem 1.1rem;
+}
+
+.dashboard-metric-compact{
+  padding: 0.85rem 0.95rem;
+}
+
+.dashboard-stat-label{
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dashboard-metric-value{
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--txt);
+  margin-bottom: 0.35rem;
+}
+
+.dashboard-action-stack,
+.dashboard-side-links{
+  display: grid;
+  gap: 0.9rem;
+}
+
+.dashboard-inline-links{
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.telemetry-badge{
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.24);
+  color: #f8d38a;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.telemetry-lab{
+  min-height: 320px;
+}
+
+.telemetry-controls{
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.telemetry-control label{
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.telemetry-loading,
+.telemetry-error-state,
+.telemetry-empty-state{
+  min-height: 240px;
+  border-radius: 18px;
+  border: 1px dashed rgba(147,197,253,0.22);
+  background: rgba(11,15,23,0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.25rem;
+}
+
+.telemetry-loading-inline,
+.telemetry-error-inline,
+.telemetry-empty-inline{
+  min-height: 180px;
+}
+
+.telemetry-header-meta{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.telemetry-header-meta div,
+.telemetry-meta-grid div{
+  padding: 0.8rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid rgba(42,52,68,0.92);
+  background: rgba(11,15,23,0.42);
+}
+
+.telemetry-header-meta span,
+.telemetry-meta-grid span{
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.telemetry-header-meta strong,
+.telemetry-meta-grid strong{
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--txt);
+}
+
+.telemetry-driver-grid{
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.telemetry-driver-card{
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(42,52,68,0.95);
+  background: linear-gradient(180deg, rgba(11,15,23,0.58), rgba(11,15,23,0.9));
+}
+
+.telemetry-driver-head{
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.telemetry-driver-code{
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.telemetry-driver-head h4{
+  margin: 0;
+  color: var(--txt);
+  font-size: 1.05rem;
+}
+
+@keyframes dashboardGlow{
+  0%, 100%{
+    box-shadow: 0 20px 42px rgba(0,0,0,0.32);
+  }
+  50%{
+    box-shadow: 0 24px 52px rgba(0,0,0,0.38);
+  }
+}
+
+@keyframes dashboardOrb{
+  0%, 100%{
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50%{
+    transform: translate3d(28px, 18px, 0) scale(1.08);
+  }
+}
+
+@keyframes dashboardFloat{
+  0%, 100%{
+    transform: translateY(0px);
+  }
+  50%{
+    transform: translateY(-6px);
+  }
+}
+
+.telemetry-lap-time{
+  margin: 0;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--txt);
+}
+
+.telemetry-meta-grid{
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.telemetry-trace{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dashboard-summary-row{
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--txt);
+}
+
+.dashboard-summary-row:last-child{
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dashboard-summary-row:first-of-type{
+  padding-top: 0.25rem;
+}
+
+.leaderboard-activity{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.activity-active{
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--open);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.activity-empty{
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
 /* Session table */
 .session-table{
   font-size: 0.9rem;
@@ -319,6 +713,29 @@ body{
   .badge-pixel{
     font-size: 0.45rem;
     padding: 4px 6px;
+  }
+
+  .dashboard-hero,
+  .leaderboard-hero,
+  .dashboard-feature-card,
+  .dashboard-race-hero,
+  .dashboard-telemetry-card{
+    padding: 1.1rem;
+  }
+
+  .dashboard-metric-value{
+    font-size: 0.88rem;
+  }
+
+  .dashboard-inline-links{
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stat-strip,
+  .telemetry-driver-grid,
+  .telemetry-header-meta,
+  .telemetry-controls{
+    grid-template-columns: 1fr;
   }
 
   .track-slot{

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Pick - {{ gp.name }} - F1 Porras{% endblock %}
+{% block title %}Seleccion - {{ gp.name }} - F1 Porras{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center gap-3 mb-4">
@@ -27,7 +27,7 @@
 
 {% else %}
 <!-- Open state - Form -->
-<h1 class="pixel-title mb-2">{% if prediction %}EDITAR{% else %}HACER{% endif %} PICK</h1>
+<h1 class="pixel-title mb-2">{% if prediction %}EDITAR{% else %}HACER{% endif %} SELECCION</h1>
 <p class="text-muted mb-4">{{ gp.name }} - {{ gp.country }}</p>
 
 <div class="row g-4">
@@ -45,7 +45,7 @@
         </div>
         {% endif %}
 
-        <h4 class="pixel-title-sm mb-3">TOP 5 PREDICCION</h4>
+        <h4 class="pixel-title-sm mb-3">TOP 5 SELECCION</h4>
         <p class="text-muted small mb-4">Selecciona los pilotos que crees que terminaran en el Top 5</p>
 
         <div class="row g-3 mb-4">
@@ -76,7 +76,7 @@
             {% if form.alonso_pos_guess.errors %}
             <div class="text-danger small mt-1">{{ form.alonso_pos_guess.errors.0 }}</div>
             {% endif %}
-            <p class="text-muted small mt-2">0 = DNF (abandono)</p>
+            <p class="text-muted small mt-2">DNF o posicion final del 1 al 22</p>
           </div>
           <div class="col-md-6">
             <label for="{{ form.sainz_pos_guess.id_for_label }}" class="form-label">
@@ -86,7 +86,7 @@
             {% if form.sainz_pos_guess.errors %}
             <div class="text-danger small mt-1">{{ form.sainz_pos_guess.errors.0 }}</div>
             {% endif %}
-            <p class="text-muted small mt-2">0 = DNF (abandono)</p>
+            <p class="text-muted small mt-2">DNF o posicion final del 1 al 22</p>
           </div>
         </div>
 
@@ -94,7 +94,7 @@
 
         <div class="d-flex gap-3">
           <button type="submit" class="btn btn-warning btn-lg">
-            Guardar pick
+            Guardar seleccion
           </button>
           <a href="{% url 'predictions:race_detail' gp.slug %}" class="btn btn-outline-secondary btn-lg">
             Cancelar
@@ -112,10 +112,10 @@
       <p class="text-accent mb-0">{{ gp.deadline_utc|date:"d M Y, H:i" }} UTC</p>
     </div>
 
-    <!-- Current pick summary (if editing) -->
+    <!-- Current selection summary (if editing) -->
     {% if prediction %}
     <div class="prediction-summary mb-4">
-      <h5 class="pixel-title-sm mb-3">PICK ACTUAL</h5>
+      <h5 class="pixel-title-sm mb-3">SELECCION ACTUAL</h5>
       <div class="mb-2">
         <span class="driver-chip">P1: {{ prediction.p1.code }}</span>
         <span class="driver-chip">P2: {{ prediction.p2.code }}</span>
@@ -139,9 +139,9 @@
       <h5 class="pixel-title-sm mb-3">REGLAS</h5>
       <ul class="small text-muted mb-0 ps-3">
         <li class="mb-2">No puedes repetir pilotos en el Top 5</li>
-        <li class="mb-2">Puedes editar tu pick hasta el deadline</li>
+        <li class="mb-2">Puedes editar tu seleccion hasta el deadline</li>
         <li class="mb-2">Solo se permite una prediccion por carrera</li>
-        <li>Posicion Alonso: 0 = DNF, 1-20 = posicion final</li>
+        <li>Alonso y Sainz: DNF o posicion final del 1 al 22</li>
       </ul>
     </div>
   </div>

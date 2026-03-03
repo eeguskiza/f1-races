@@ -65,7 +65,7 @@ class PredictionForm(forms.ModelForm):
             )
             self.fields[field_name].empty_label = None
 
-        pos_choices = [(0, "DNF")] + [(i, str(i)) for i in range(1, 21)]
+        pos_choices = [(0, "DNF")] + [(i, str(i)) for i in range(1, 23)]
 
         self.fields["alonso_pos_guess"] = forms.ChoiceField(
             choices=pos_choices,

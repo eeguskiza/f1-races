@@ -3,44 +3,173 @@
 {% block title %}Dashboard - F1 Porras{% endblock %}
 
 {% block content %}
-<h1 class="pixel-title mb-4">Hola, {{ user.username }}</h1>
-
 <div class="row g-4">
-  <!-- Left column: Stats + Recent predictions -->
-  <div class="col-lg-7">
-    <!-- Total score -->
-    <div class="card-dark p-4 mb-4">
-      <div class="row align-items-center">
-        <div class="col">
-          <p class="text-muted mb-1">Tu puntuacion total</p>
-          <h2 class="pixel-title text-accent mb-0">{{ total_points }} PTS</h2>
+  <div class="col-12">
+    {% if next_event %}
+    <div class="dashboard-race-hero mb-4">
+      <div class="row g-4 align-items-stretch">
+        <div class="col-xl-7">
+          <div class="dashboard-race-copy">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+              <span class="dashboard-kicker">Siguiente carrera</span>
+              {% if next_event.is_locked %}
+              <span class="badge-pixel badge-closed">CERRADO</span>
+              {% else %}
+              <span class="badge-pixel badge-open">ABIERTO</span>
+              {% endif %}
+            </div>
+
+            <h1 class="pixel-title mb-3">{{ next_event.name }}</h1>
+            <p class="dashboard-hero-copy mb-3">{{ next_event.country }} - {{ next_event.circuit }}</p>
+
+            {% if next_event.deadline_utc %}
+            <p class="dashboard-deadline mb-4">
+              Deadline: {{ next_event.deadline_utc|date:"d M Y, H:i" }} UTC
+            </p>
+            {% endif %}
+
+            <div class="dashboard-cta-row">
+              {% if not next_event.is_locked %}
+              <a href="{% url 'predictions:pick' next_event.slug %}" class="btn btn-warning btn-lg">
+                {% if user_prediction %}Editar mi seleccion{% else %}Hacer mi seleccion{% endif %}
+              </a>
+              {% else %}
+              <a href="{% url 'predictions:race_detail' next_event.slug %}" class="btn btn-outline-light btn-lg">
+                Ver detalle del GP
+              </a>
+              {% endif %}
+              <a href="{% url 'predictions:leaderboard' %}" class="btn btn-outline-light btn-lg">
+                Ver leaderboard
+              </a>
+            </div>
+
+            <div class="dashboard-stat-strip mt-4">
+              <div class="dashboard-stat-pill">
+                <span class="dashboard-stat-label">Puntuacion</span>
+                <strong>{{ total_points }} pts</strong>
+              </div>
+              <div class="dashboard-stat-pill">
+                <span class="dashboard-stat-label">Selecciones</span>
+                <strong>{{ total_picks }}/{{ total_races }}</strong>
+              </div>
+              <div class="dashboard-stat-pill">
+                <span class="dashboard-stat-label">Pendientes</span>
+                <strong>{{ missing_picks }}</strong>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-auto">
-          <a href="{% url 'predictions:leaderboard' %}" class="btn btn-outline-light btn-sm">
-            Ver ranking
-          </a>
+        <div class="col-xl-5">
+          <div class="dashboard-race-side">
+            {% circuit_slot next_event.slug "dashboard-track-slot" %}
+
+            {% if user_prediction %}
+            <div class="prediction-summary mt-3">
+              <p class="small text-muted mb-2">Tu seleccion actual</p>
+              <div class="mb-2">
+                <span class="driver-chip">P1: {{ user_prediction.p1.code }}</span>
+                <span class="driver-chip">P2: {{ user_prediction.p2.code }}</span>
+                <span class="driver-chip">P3: {{ user_prediction.p3.code }}</span>
+                <span class="driver-chip">P4: {{ user_prediction.p4.code }}</span>
+                <span class="driver-chip">P5: {{ user_prediction.p5.code }}</span>
+              </div>
+              <p class="small mb-0">
+                Alonso: {% if user_prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.alonso_pos_guess }}{% endif %}
+                &nbsp;|&nbsp;
+                Sainz: {% if user_prediction.sainz_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.sainz_pos_guess }}{% endif %}
+              </p>
+            </div>
+            {% else %}
+            <div class="dashboard-empty mt-3">
+              <p class="pixel-title-sm mb-2">SIN SELECCION TODAVIA</p>
+              <p class="text-muted small mb-0">Todavia no has enviado tu seleccion para esta carrera.</p>
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
+    {% else %}
+    <div class="pixel-box text-center py-5 mb-4">
+      <p class="pixel-title-sm mb-2">SIN PROXIMA CARRERA</p>
+      <p class="text-muted mb-0">Todavia no hay otro GP cargado en el calendario.</p>
+    </div>
+    {% endif %}
+  </div>
 
-    <!-- Quick links -->
-    <div class="row g-3 mb-4">
-      <div class="col-6">
+  <div class="col-xl-7">
+    <div class="dashboard-telemetry-card">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <p class="dashboard-kicker mb-2">Replay 2025</p>
+          <h3 class="pixel-title-sm mb-2">LABORATORIO DE TELEMETRIA</h3>
+          <p class="text-muted mb-0">
+            Compara una vuelta rapida historica y cambia pilotos para ver como varia el ritmo en pista.
+          </p>
+        </div>
+        <div class="telemetry-badge">Archivo de carrera</div>
+      </div>
+
+      <div id="telemetry-lab" class="telemetry-lab">
+        <div class="telemetry-loading">
+          <p class="pixel-title-sm mb-2">CARGANDO DATOS...</p>
+          <p class="text-muted small mb-0">Preparando una comparativa historica con Alonso y Sainz como punto de partida.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="dashboard-side-panel mb-4">
+      <p class="dashboard-kicker mb-3">Estado temporada</p>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="dashboard-metric dashboard-metric-compact">
+            <p class="dashboard-stat-label mb-1">Selecciones</p>
+            <div class="dashboard-metric-value">{{ total_picks }}</div>
+            <p class="text-muted small mb-0">de {{ total_races }}</p>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="dashboard-metric dashboard-metric-compact">
+            <p class="dashboard-stat-label mb-1">Con puntos</p>
+            <div class="dashboard-metric-value">{{ scored_picks }}</div>
+            <p class="text-muted small mb-0">ya resueltas</p>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="dashboard-metric dashboard-metric-compact">
+            <p class="dashboard-stat-label mb-1">Pendientes</p>
+            <div class="dashboard-metric-value">{{ missing_picks }}</div>
+            <p class="text-muted small mb-0">por hacer</p>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="dashboard-metric dashboard-metric-compact">
+            <p class="dashboard-stat-label mb-1">Progreso</p>
+            <div class="dashboard-metric-value">{% if total_races %}{{ total_picks }}/{{ total_races }}{% else %}0{% endif %}</div>
+            <p class="text-muted small mb-0">temporada</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-inline-links mt-3">
         <a href="{% url 'predictions:races' %}" class="quick-link">
           <p class="pixel-title-sm mb-1">CALENDARIO</p>
-          <p class="text-muted small mb-0">Ver todas las carreras</p>
+          <p class="text-muted small mb-0">Fechas</p>
         </a>
-      </div>
-      <div class="col-6">
         <a href="{% url 'predictions:leaderboard' %}" class="quick-link">
           <p class="pixel-title-sm mb-1">LEADERBOARD</p>
-          <p class="text-muted small mb-0">Ranking de jugadores</p>
+          <p class="text-muted small mb-0">Clasificacion</p>
+        </a>
+        <a href="{% url 'predictions:porras' %}" class="quick-link">
+          <p class="pixel-title-sm mb-1">TABLON</p>
+          <p class="text-muted small mb-0">Selecciones</p>
         </a>
       </div>
     </div>
 
-    <!-- Recent predictions -->
-    <h3 class="pixel-title-sm mb-3">MIS ULTIMAS PREDICCIONES</h3>
+    <h3 class="pixel-title-sm mb-3">MIS ULTIMAS SELECCIONES</h3>
     {% if recent_predictions %}
     <div class="card-dark">
       <div class="table-responsive">
@@ -82,94 +211,370 @@
     </div>
     {% else %}
     <div class="pixel-box text-center py-4">
-      <p class="text-muted mb-0">No has hecho ninguna prediccion todavia</p>
-      <p class="small text-muted mt-2">Ve al calendario y haz tu primer pick</p>
+      <p class="text-muted mb-0">No has hecho ninguna seleccion todavia</p>
+      <p class="small text-muted mt-2">Ve al calendario y haz tu primera seleccion</p>
     </div>
-    {% endif %}
-  </div>
-
-  <!-- Right column: Next race -->
-  <div class="col-lg-5">
-    <h3 class="pixel-title-sm mb-3">PROXIMA CARRERA</h3>
-
-    {% if next_event %}
-    <div class="highlight-box">
-      <h4 class="mb-2">{{ next_event.name }}</h4>
-      <p class="text-muted mb-2">{{ next_event.country }} - {{ next_event.circuit }}</p>
-
-      <!-- Status badge -->
-      <div class="mb-3">
-        {% if next_event.is_locked %}
-        <span class="badge-pixel badge-closed">CERRADO</span>
-        {% else %}
-        <span class="badge-pixel badge-open">ABIERTO</span>
-        {% endif %}
-      </div>
-
-      <!-- Deadline -->
-      {% if next_event.deadline_utc %}
-      <p class="small mb-3">
-        <span class="text-muted">Deadline:</span>
-        {{ next_event.deadline_utc|date:"d M Y, H:i" }} UTC
-      </p>
-      {% endif %}
-
-      <!-- Track slot -->
-      {% circuit_slot next_event.slug "mb-3" %}
-
-      <!-- User prediction status -->
-      {% if user_prediction %}
-      <div class="prediction-summary mb-3">
-        <p class="small text-muted mb-2">Tu prediccion:</p>
-        <div class="mb-2">
-          <span class="driver-chip">P1: {{ user_prediction.p1.code }}</span>
-          <span class="driver-chip">P2: {{ user_prediction.p2.code }}</span>
-          <span class="driver-chip">P3: {{ user_prediction.p3.code }}</span>
-          <span class="driver-chip">P4: {{ user_prediction.p4.code }}</span>
-          <span class="driver-chip">P5: {{ user_prediction.p5.code }}</span>
-        </div>
-        <p class="small mb-0">
-          Alonso: {% if user_prediction.alonso_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.alonso_pos_guess }}{% endif %}
-          &nbsp;|&nbsp;
-          Sainz: {% if user_prediction.sainz_pos_guess == 0 %}DNF{% else %}P{{ user_prediction.sainz_pos_guess }}{% endif %}
-        </p>
-      </div>
-      {% endif %}
-
-      <!-- Action button -->
-      {% if not next_event.is_locked %}
-      <a href="{% url 'predictions:pick' next_event.slug %}" class="btn btn-warning w-100">
-        {% if user_prediction %}Editar mi pick{% else %}Hacer mi pick{% endif %}
-      </a>
-      {% else %}
-      <a href="{% url 'predictions:race_detail' next_event.slug %}" class="btn btn-outline-light w-100">
-        Ver detalle
-      </a>
-      {% endif %}
-    </div>
-    {% else %}
-    <div class="pixel-box text-center py-4">
-      <p class="text-muted mb-0">No hay proxima carrera programada</p>
-    </div>
-    {% endif %}
-
-    <!-- News section -->
-    {% if news %}
-    <h3 class="pixel-title-sm mb-3 mt-4">NOTICIAS</h3>
-    {% for post in news %}
-    <a href="{% url 'predictions:news_detail' post.pk %}" class="text-decoration-none">
-    <div class="news-card mb-3">
-      {% if post.image_url %}
-      <div class="news-image-wrapper mb-2">
-        <img src="{{ post.image_url }}" alt="{{ post.title }}" class="news-image" loading="lazy">
-      </div>
-      {% endif %}
-      <h6 class="mb-1 text-light">{{ post.title }}</h6>
-      <p class="text-muted small mb-0">{{ post.body|truncatewords:20 }}</p>
-    </div>
-    </a>
-    {% endfor %}
     {% endif %}
   </div>
 </div>
+
+<script>
+(function() {
+  var root = document.getElementById("telemetry-lab");
+  if (!root) return;
+
+  var API_BASE = "https://api.openf1.org/v1";
+  var DEFAULT_DRIVERS = [14, 55];
+  var driverCache = new Map();
+  var driverDirectory = [];
+  var currentSession = null;
+  var initialRetryDone = false;
+
+  function sleep(ms) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function(char) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char];
+    });
+  }
+
+  function formatLap(seconds) {
+    if (!seconds && seconds !== 0) return "--";
+    var mins = Math.floor(seconds / 60);
+    var secs = (seconds % 60).toFixed(3).padStart(6, "0");
+    return mins + ":" + secs;
+  }
+
+  function formatDate(dateString) {
+    try {
+      return new Intl.DateTimeFormat("es-ES", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "UTC"
+      }).format(new Date(dateString)) + " UTC";
+    } catch (error) {
+      return dateString;
+    }
+  }
+
+  function average(values) {
+    if (!values.length) return 0;
+    var total = values.reduce(function(sum, value) { return sum + value; }, 0);
+    return Math.round(total / values.length);
+  }
+
+  function buildTraceSvg(points, color) {
+    var width = 620;
+    var height = 150;
+    if (!points.length) {
+      return '<div class="telemetry-empty-state">Sin telemetria disponible</div>';
+    }
+
+    var speeds = points.map(function(point) { return point.speed || 0; });
+    var min = Math.min.apply(null, speeds);
+    var max = Math.max.apply(null, speeds);
+    var range = Math.max(max - min, 1);
+
+    var polyline = points.map(function(point, index) {
+      var x = points.length === 1 ? 0 : (index / (points.length - 1)) * width;
+      var y = height - (((point.speed || 0) - min) / range) * (height - 18) - 9;
+      return x.toFixed(2) + "," + y.toFixed(2);
+    }).join(" ");
+
+    return [
+      '<svg viewBox="0 0 ', width, " ", height, '" class="telemetry-trace" role="img" aria-label="Traza de velocidad">',
+      '<defs><linearGradient id="telemetry-gradient-', color.slice(1), '" x1="0" x2="0" y1="0" y2="1">',
+      '<stop offset="0%" stop-color="', color, '" stop-opacity="0.30"></stop>',
+      '<stop offset="100%" stop-color="', color, '" stop-opacity="0"></stop>',
+      '</linearGradient></defs>',
+      '<rect x="0" y="0" width="', width, '" height="', height, '" rx="18" fill="rgba(11,15,23,0.55)"></rect>',
+      '<polyline points="', polyline, '" fill="none" stroke="', color, '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>',
+      '</svg>'
+    ].join("");
+  }
+
+  function buildDriverCard(driver, lap, telemetry) {
+    var topSpeed = telemetry.length ? Math.max.apply(null, telemetry.map(function(point) { return point.speed || 0; })) : 0;
+    var maxRpm = telemetry.length ? Math.max.apply(null, telemetry.map(function(point) { return point.rpm || 0; })) : 0;
+    var avgThrottle = average(telemetry.map(function(point) { return point.throttle || 0; }));
+    var drsOpen = telemetry.filter(function(point) {
+      return [10, 12, 14].indexOf(point.drs) !== -1;
+    }).length;
+    var drsPct = telemetry.length ? Math.round((drsOpen / telemetry.length) * 100) : 0;
+
+    return [
+      '<article class="telemetry-driver-card">',
+      '<div class="telemetry-driver-head">',
+      '<div>',
+      '<p class="telemetry-driver-code" style="color:', driver.accent, '">', driver.code, "</p>",
+      '<h4>', escapeHtml(driver.name), "</h4>",
+      "</div>",
+      '<p class="telemetry-lap-time">', formatLap(lap.lap_duration), "</p>",
+      "</div>",
+      '<div class="telemetry-meta-grid">',
+      '<div><span>Vuelta</span><strong>', lap.lap_number || "--", "</strong></div>",
+      '<div><span>Top speed</span><strong>', topSpeed ? topSpeed + " km/h" : "--", "</strong></div>",
+      '<div><span>RPM max</span><strong>', maxRpm ? maxRpm.toLocaleString("es-ES") : "--", "</strong></div>",
+      '<div><span>DRS abierto</span><strong>', drsPct, "%</strong></div>",
+      '<div><span>Acelerador medio</span><strong>', avgThrottle, "%</strong></div>",
+      "</div>",
+      buildTraceSvg(telemetry, driver.accent),
+      "</article>"
+    ].join("");
+  }
+
+  function buildSelectOptions(selectedNumber) {
+    return driverDirectory.map(function(driver) {
+      var selected = String(driver.driver_number) === String(selectedNumber) ? " selected" : "";
+      return '<option value="' + driver.driver_number + '"' + selected + '>' +
+        escapeHtml(driver.name_acronym + " · " + driver.full_name) +
+      "</option>";
+    }).join("");
+  }
+
+  function buildTelemetryShell(selectedNumbers) {
+    return [
+      '<div class="telemetry-controls mb-4">',
+      '<div class="telemetry-control"><label for="telemetry-driver-a">Piloto A</label><select id="telemetry-driver-a" class="form-select">',
+      buildSelectOptions(selectedNumbers[0]),
+      "</select></div>",
+      '<div class="telemetry-control"><label for="telemetry-driver-b">Piloto B</label><select id="telemetry-driver-b" class="form-select">',
+      buildSelectOptions(selectedNumbers[1]),
+      "</select></div>",
+      "</div>",
+      '<div class="telemetry-header-meta">',
+      '<div><span>Sesion</span><strong>', escapeHtml(currentSession.meeting_name), "</strong></div>",
+      '<div><span>Fecha</span><strong>', formatDate(currentSession.date_start), "</strong></div>",
+      '<div><span>Modo</span><strong>Historico</strong></div>',
+      "</div>",
+      '<div id="telemetry-driver-grid" class="telemetry-driver-grid"></div>'
+    ].join("");
+  }
+
+  function chooseFastestLap(laps) {
+    return laps
+      .filter(function(lap) {
+        return lap.lap_duration && lap.date_start && !lap.is_pit_out_lap;
+      })
+      .sort(function(a, b) { return a.lap_duration - b.lap_duration; })[0];
+  }
+
+  async function loadDriverData(driverNumber) {
+    if (driverCache.has(driverNumber)) {
+      return driverCache.get(driverNumber);
+    }
+
+    var driver = driverDirectory.find(function(item) {
+      return String(item.driver_number) === String(driverNumber);
+    });
+
+    if (!driver) {
+      throw new Error("Piloto no disponible");
+    }
+
+    var laps = await fetchJson(API_BASE + "/laps?session_key=" + currentSession.session_key + "&driver_number=" + driverNumber);
+    var fastestLap = chooseFastestLap(laps);
+
+    if (!fastestLap) {
+      var missingPayload = { driver: driver, missing: true };
+      driverCache.set(driverNumber, missingPayload);
+      return missingPayload;
+    }
+
+    var lapStart = new Date(new Date(fastestLap.date_start).getTime() - 200).toISOString();
+    var lapEnd = new Date(new Date(fastestLap.date_start).getTime() + (fastestLap.lap_duration * 1000) + 1200).toISOString();
+    var telemetry = await fetchJson(
+      API_BASE + "/car_data?session_key=" + currentSession.session_key +
+      "&driver_number=" + driverNumber +
+      "&date>" + encodeURIComponent(lapStart) +
+      "&date<" + encodeURIComponent(lapEnd)
+    );
+
+    var payload = {
+      driver: driver,
+      lap: fastestLap,
+      telemetry: telemetry
+    };
+    driverCache.set(driverNumber, payload);
+    return payload;
+  }
+
+  async function renderDrivers(selectedNumbers) {
+    var grid = document.getElementById("telemetry-driver-grid");
+    if (!grid) return;
+
+    grid.innerHTML = '<div class="telemetry-loading telemetry-loading-inline"><p class="text-muted small mb-0">Actualizando trazado...</p></div>';
+
+    try {
+      var driverPayload = [];
+      for (var i = 0; i < selectedNumbers.length; i += 1) {
+        try {
+          var driverData = await loadDriverData(selectedNumbers[i]);
+          driverPayload.push({ status: "fulfilled", value: driverData });
+        } catch (error) {
+          driverPayload.push({ status: "rejected", reason: error });
+        }
+      }
+
+      var cards = driverPayload.map(function(result, index) {
+        if (result.status === "rejected") {
+          var selectedDriver = driverDirectory.find(function(driver) {
+            return String(driver.driver_number) === String(selectedNumbers[index]);
+          });
+          return [
+            '<article class="telemetry-driver-card">',
+            '<div class="telemetry-driver-head">',
+            '<div>',
+            '<p class="telemetry-driver-code">', escapeHtml(selectedDriver ? selectedDriver.name_acronym : "DRV"), "</p>",
+            "<h4>", escapeHtml(selectedDriver ? selectedDriver.full_name : "Piloto"), "</h4>",
+            "</div></div>",
+            '<div class="telemetry-error-state telemetry-error-inline">',
+            '<p class="text-muted small mb-0">No se pudo cargar esta vuelta. Prueba con otro piloto.</p>',
+            "</div>",
+            "</article>"
+          ].join("");
+        }
+
+        var item = result.value;
+        if (item.missing || !item.telemetry || !item.telemetry.length) {
+          return [
+            '<article class="telemetry-driver-card">',
+            '<div class="telemetry-driver-head">',
+            '<div>',
+            '<p class="telemetry-driver-code">', escapeHtml(item.driver.name_acronym || "DRV"), "</p>",
+            "<h4>", escapeHtml(item.driver.full_name || "Piloto"), "</h4>",
+            "</div></div>",
+            '<div class="telemetry-empty-state telemetry-empty-inline">Sin vuelta rapida utilizable en esta sesion.</div>',
+            "</article>"
+          ].join("");
+        }
+
+        return buildDriverCard({
+          code: item.driver.name_acronym,
+          name: item.driver.full_name,
+          accent: "#" + (item.driver.team_colour || "93c5fd")
+        }, item.lap, item.telemetry);
+      });
+
+      grid.innerHTML = cards.join("");
+
+      var failedDrivers = driverPayload
+        .map(function(result, index) {
+          if (result.status === "rejected") {
+            return selectedNumbers[index];
+          }
+          if (result.value.missing || !result.value.telemetry || !result.value.telemetry.length) {
+            return selectedNumbers[index];
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      var hasSuccess = driverPayload.some(function(result) {
+        return result.status === "fulfilled" &&
+          !result.value.missing &&
+          result.value.telemetry &&
+          result.value.telemetry.length;
+      });
+
+      if (failedDrivers.length && !initialRetryDone) {
+        initialRetryDone = true;
+        failedDrivers.forEach(function(driverNumber) {
+          driverCache.delete(String(driverNumber));
+          driverCache.delete(Number(driverNumber));
+        });
+        setTimeout(function() {
+          renderDrivers(selectedNumbers);
+        }, 450);
+      }
+    } catch (error) {
+      grid.innerHTML = [
+        '<div class="telemetry-error-state telemetry-error-inline">',
+        '<p class="text-muted small mb-0">No se ha podido actualizar esta comparativa. Prueba con otros pilotos.</p>',
+        "</div>"
+      ].join("");
+    }
+  }
+
+  async function fetchJson(url, attempt) {
+    var currentAttempt = attempt || 0;
+    var response = await fetch(url);
+    if (!response.ok) {
+      if ((response.status === 429 || response.status >= 500) && currentAttempt < 2) {
+        await sleep(700 * (currentAttempt + 1));
+        return fetchJson(url, currentAttempt + 1);
+      }
+      throw new Error("HTTP " + response.status);
+    }
+    return response.json();
+  }
+
+  async function loadTelemetry() {
+    try {
+      var sessions = await fetchJson(API_BASE + "/sessions?year=2025&session_name=Race");
+      if (!sessions.length) throw new Error("No hay sesiones de carrera para 2025.");
+
+      sessions.sort(function(a, b) {
+        return new Date(a.date_start) - new Date(b.date_start);
+      });
+
+      currentSession = sessions[sessions.length - 1];
+      driverDirectory = await fetchJson(API_BASE + "/drivers?session_key=" + currentSession.session_key);
+      driverDirectory.sort(function(a, b) {
+        return String(a.full_name || "").localeCompare(String(b.full_name || ""));
+      });
+
+      if (!driverDirectory.length) throw new Error("No hay pilotos disponibles.");
+
+      var selectedNumbers = DEFAULT_DRIVERS.map(function(defaultNumber, index) {
+        var found = driverDirectory.find(function(driver) {
+          return String(driver.driver_number) === String(defaultNumber);
+        });
+        if (found) return found.driver_number;
+        return driverDirectory[index] ? driverDirectory[index].driver_number : driverDirectory[0].driver_number;
+      });
+
+      root.innerHTML = buildTelemetryShell(selectedNumbers);
+
+      var selectA = document.getElementById("telemetry-driver-a");
+      var selectB = document.getElementById("telemetry-driver-b");
+      var update = function() {
+        renderDrivers([selectA.value, selectB.value]);
+      };
+
+      selectA.value = String(selectedNumbers[0]);
+      selectB.value = String(selectedNumbers[1]);
+
+      selectA.addEventListener("change", update);
+      selectB.addEventListener("change", update);
+
+      requestAnimationFrame(function() {
+        update();
+      });
+    } catch (error) {
+      root.innerHTML = [
+        '<div class="telemetry-error-state">',
+        '<p class="pixel-title-sm mb-2">NO SE PUDO CARGAR</p>',
+        '<p class="text-muted small mb-0">Si falla esta parte, el dashboard sigue funcionando igualmente.</p>',
+        "</div>"
+      ].join("");
+    }
+  }
+
+  loadTelemetry();
+})();
+</script>
 {% endblock %}

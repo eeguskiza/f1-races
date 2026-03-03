@@ -2,23 +2,60 @@
 {% block title %}Leaderboard - F1 Porras{% endblock %}
 
 {% block content %}
-<h1 class="pixel-title mb-4">LEADERBOARD</h1>
+<div class="leaderboard-hero mb-4">
+  <p class="text-muted small text-uppercase mb-2">
+    {% if has_scored_predictions %}Clasificacion general{% else %}Estado de pretemporada{% endif %}
+  </p>
+  <h1 class="pixel-title mb-3">LEADERBOARD</h1>
+  {% if has_scored_predictions %}
+  <p class="mb-0 text-muted">Ranking ordenado por puntuacion total. En empate, manda quien tenga mas selecciones enviadas.</p>
+  {% else %}
+  <p class="mb-0 text-muted">Todavia no hay carreras puntuadas. Mientras tanto, mostramos actividad de jugadores y selecciones enviadas, no un top real.</p>
+  {% endif %}
+</div>
 
 {% if users_data %}
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="dashboard-metric">
+      <p class="dashboard-stat-label mb-1">Jugadores con seleccion</p>
+      <div class="dashboard-metric-value">{{ active_players }}</div>
+      <p class="text-muted small mb-0">usuarios activos esta temporada</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="dashboard-metric">
+      <p class="dashboard-stat-label mb-1">Carreras cargadas</p>
+      <div class="dashboard-metric-value">{{ total_races }}</div>
+      <p class="text-muted small mb-0">grandes premios en el calendario</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="dashboard-metric">
+      <p class="dashboard-stat-label mb-1">Modo actual</p>
+      <div class="dashboard-metric-value">{% if has_scored_predictions %}PTS{% else %}SELEC{% endif %}</div>
+      <p class="text-muted small mb-0">{% if has_scored_predictions %}clasificacion oficial{% else %}seguimiento previo{% endif %}</p>
+    </div>
+  </div>
+</div>
+
 <div class="card-dark">
   <div class="table-responsive">
     <table class="table table-dark mb-0 leaderboard-table">
       <thead>
         <tr>
+          {% if has_scored_predictions %}
           <th style="width: 60px;">#</th>
+          {% endif %}
           <th>Usuario</th>
-          <th class="text-end">Puntos</th>
-          <th class="text-end">Picks</th>
+          <th class="text-end">{% if has_scored_predictions %}Puntos{% else %}Actividad{% endif %}</th>
+          <th class="text-end">Selecciones</th>
         </tr>
       </thead>
       <tbody>
         {% for data in users_data %}
         <tr>
+          {% if has_scored_predictions %}
           <td>
             {% with rank=forloop.counter %}
             <span class="rank-badge {% if rank == 1 %}rank-1{% elif rank == 2 %}rank-2{% elif rank == 3 %}rank-3{% else %}rank-other{% endif %}">
@@ -26,6 +63,7 @@
             </span>
             {% endwith %}
           </td>
+          {% endif %}
           <td>
             <span class="{% if user.username == data.username %}text-accent{% endif %}">
               {{ data.username }}
@@ -35,7 +73,13 @@
             </span>
           </td>
           <td class="text-end">
+            {% if has_scored_predictions %}
             <span class="pixel-title-sm">{{ data.total_score }}</span>
+            {% else %}
+            <span class="leaderboard-activity {% if data.picks_count %}activity-active{% else %}activity-empty{% endif %}">
+              {% if data.picks_count %}Activo{% else %}Sin seleccion{% endif %}
+            </span>
+            {% endif %}
           </td>
           <td class="text-end text-muted">
             {{ data.picks_count }}{% if total_races %}/{{ total_races }}{% endif %}
@@ -47,9 +91,11 @@
   </div>
 </div>
 
-<p class="text-muted small mt-3">
-  Ranking ordenado por puntuacion total. Picks = predicciones hechas.
+{% if not has_scored_predictions %}
+<p class="text-muted small mt-3 mb-0">
+  Este orden solo usa selecciones enviadas para que no aparezca un top ficticio antes de la primera carrera puntuable.
 </p>
+{% endif %}
 
 {% else %}
 <div class="pixel-box text-center py-5">

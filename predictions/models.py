@@ -74,7 +74,7 @@ class GrandPrix(models.Model):
 
     @property
     def deadline_utc(self):
-        """Predictions close 48h before FP1."""
+        """Predictions close 24h before FP1."""
         fp1 = self.fp1_start_utc
         if fp1:
             return fp1 - timedelta(hours=24)
@@ -134,8 +134,8 @@ class Prediction(models.Model):
     p4 = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name="+")
     p5 = models.ForeignKey(Driver, on_delete=models.PROTECT, related_name="+")
 
-    alonso_pos_guess = models.IntegerField()  # 0=DNF, 1-20
-    sainz_pos_guess = models.IntegerField(default=0)  # 0=DNF, 1-20
+    alonso_pos_guess = models.IntegerField()  # 0=DNF, 1-22
+    sainz_pos_guess = models.IntegerField(default=0)  # 0=DNF, 1-22
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -157,12 +157,12 @@ class Prediction(models.Model):
             raise ValidationError("Top5: no puedes repetir pilotos.")
 
         # Validate alonso position
-        if self.alonso_pos_guess < 0 or self.alonso_pos_guess > 20:
-            raise ValidationError("Posición Alonso inválida (0=DNF, 1-20).")
+        if self.alonso_pos_guess < 0 or self.alonso_pos_guess > 22:
+            raise ValidationError("Posición Alonso inválida (0=DNF, 1-22).")
 
         # Validate sainz position
-        if self.sainz_pos_guess < 0 or self.sainz_pos_guess > 20:
-            raise ValidationError("Posición Sainz inválida (0=DNF, 1-20).")
+        if self.sainz_pos_guess < 0 or self.sainz_pos_guess > 22:
+            raise ValidationError("Posición Sainz inválida (0=DNF, 1-22).")
 
         # Validate deadline (event may not be set yet during form validation)
         if self.event_id is not None and self.event.is_locked:

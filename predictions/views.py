@@ -60,11 +60,16 @@ def dashboard(request):
     """User dashboard with total points, next race, and recent predictions."""
     user = request.user
     now = timezone.now()
+    user_predictions = Prediction.objects.filter(user=user)
 
     # Total points
-    total_points = Prediction.objects.filter(
-        user=user, score__isnull=False
-    ).aggregate(total=Sum("score"))["total"] or 0
+    total_points = user_predictions.filter(score__isnull=False).aggregate(
+        total=Sum("score")
+    )["total"] or 0
+    total_picks = user_predictions.count()
+    scored_picks = user_predictions.filter(score__isnull=False).count()
+    total_races = GrandPrix.objects.count()
+    missing_picks = max(total_races - total_picks, 0)
 
     # Next race (first event with RACE session in future)
     next_event = None
@@ -73,25 +78,25 @@ def dashboard(request):
         race_start = gp.race_start_utc
         if race_start and race_start > now:
             next_event = gp
-            user_prediction = Prediction.objects.filter(user=user, event=gp).select_related(
+            user_prediction = user_predictions.filter(event=gp).select_related(
                 "p1", "p2", "p3", "p4", "p5"
             ).first()
             break
 
     # Recent predictions (last 5)
-    recent_predictions = Prediction.objects.filter(user=user).select_related(
+    recent_predictions = user_predictions.select_related(
         "event", "p1", "p2", "p3", "p4", "p5"
     ).order_by("-event__round")[:5]
 
-    # Recent news (3 posts)
-    news = NewsPost.objects.all()[:3]
-
     context = {
         "total_points": total_points,
+        "total_picks": total_picks,
+        "scored_picks": scored_picks,
+        "missing_picks": missing_picks,
+        "total_races": total_races,
         "next_event": next_event,
         "user_prediction": user_prediction,
         "recent_predictions": recent_predictions,
-        "news": news,
     }
     return render(request, "predictions/dashboard.html", context)
 
@@ -173,7 +178,7 @@ def pick(request, slug):
             pred.sainz_pos_guess = int(form.cleaned_data["sainz_pos_guess"])
             try:
                 pred.save()
-                messages.success(request, f"Pick guardado para {gp.name}")
+                messages.success(request, f"Seleccion guardada para {gp.name}")
                 return redirect("predictions:dashboard")
             except Exception as e:
                 form.add_error(None, str(e))
@@ -225,6 +230,8 @@ def porras(request):
 
 def leaderboard(request):
     """Leaderboard ranking by total points. Shows all registered users."""
+    has_scored_predictions = Prediction.objects.filter(score__isnull=False).exists()
+
     # Aggregate scores per user (only users who have predictions)
     stats_by_user = {
         row["user_id"]: row
@@ -244,12 +251,17 @@ def leaderboard(request):
             "picks_count": stats["picks_count"] if stats else 0,
         })
 
-    # Sort by total_score desc, then username asc
-    users_data.sort(key=lambda x: (-x["total_score"], x["username"]))
+    if has_scored_predictions:
+        users_data.sort(key=lambda x: (-x["total_score"], -x["picks_count"], x["username"]))
+    else:
+        users_data.sort(key=lambda x: (-x["picks_count"], x["username"]))
 
     total_races = GrandPrix.objects.count()
+    active_players = sum(1 for data in users_data if data["picks_count"] > 0)
 
     return render(request, "predictions/leaderboard.html", {
         "users_data": users_data,
         "total_races": total_races,
+        "has_scored_predictions": has_scored_predictions,
+        "active_players": active_players,
     })

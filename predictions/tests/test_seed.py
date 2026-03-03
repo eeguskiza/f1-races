@@ -51,13 +51,13 @@ class SeedCommandTests(TestCase):
                 f"Event {gp.name} missing FP1 session"
             )
 
-    def test_deadline_is_48h_before_fp1(self):
-        """Deadline should be 48 hours before FP1."""
+    def test_deadline_is_24h_before_fp1(self):
+        """Deadline should be 24 hours before FP1."""
         call_command("seed_2026", stdout=StringIO())
         gp = GrandPrix.objects.first()
         fp1 = gp.fp1_start_utc
         deadline = gp.deadline_utc
-        self.assertEqual(deadline, fp1 - timedelta(hours=48))
+        self.assertEqual(deadline, fp1 - timedelta(hours=24))
 
     def test_driver_alonso_exists(self):
         call_command("seed_2026", stdout=StringIO())
@@ -80,7 +80,7 @@ class DeadlineValidationTests(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
 
     def test_prediction_blocked_after_deadline(self):
-        """Cannot create prediction after deadline (FP1 - 48h)."""
+        """Cannot create prediction after deadline (FP1 - 24h)."""
         # Create event with FP1 in the past
         gp = GrandPrix.objects.create(
             season_year=2026,
@@ -88,7 +88,7 @@ class DeadlineValidationTests(TestCase):
             name="Test GP",
             slug="test-gp"
         )
-        # FP1 was 24 hours ago, so deadline was 72 hours ago
+        # FP1 was 24 hours ago, so deadline has already passed
         Session.objects.create(
             event=gp,
             session_type="FP1",
@@ -139,6 +139,64 @@ class DeadlineValidationTests(TestCase):
         )
         prediction.save()  # Should not raise
         self.assertIsNotNone(prediction.pk)
+
+    def test_position_22_is_allowed(self):
+        """22 should be a valid finishing position for Alonso and Sainz."""
+        gp = GrandPrix.objects.create(
+            season_year=2026,
+            round=96,
+            name="Future GP 22",
+            slug="future-gp-22"
+        )
+        Session.objects.create(
+            event=gp,
+            session_type="FP1",
+            start_utc=timezone.now() + timedelta(days=7),
+            order=1
+        )
+
+        prediction = Prediction(
+            user=self.user,
+            event=gp,
+            p1=self.driver1,
+            p2=self.driver2,
+            p3=self.driver3,
+            p4=self.driver4,
+            p5=self.driver5,
+            alonso_pos_guess=22,
+            sainz_pos_guess=22,
+        )
+        prediction.save()
+        self.assertIsNotNone(prediction.pk)
+
+    def test_position_23_is_rejected(self):
+        """23 should remain invalid."""
+        gp = GrandPrix.objects.create(
+            season_year=2026,
+            round=95,
+            name="Future GP 23",
+            slug="future-gp-23"
+        )
+        Session.objects.create(
+            event=gp,
+            session_type="FP1",
+            start_utc=timezone.now() + timedelta(days=7),
+            order=1
+        )
+
+        prediction = Prediction(
+            user=self.user,
+            event=gp,
+            p1=self.driver1,
+            p2=self.driver2,
+            p3=self.driver3,
+            p4=self.driver4,
+            p5=self.driver5,
+            alonso_pos_guess=23,
+            sainz_pos_guess=22,
+        )
+        with self.assertRaises(ValidationError):
+            prediction.save()
 
     def test_duplicate_drivers_rejected(self):
         """Cannot have duplicate drivers in top5."""

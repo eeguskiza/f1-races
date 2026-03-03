@@ -46,7 +46,7 @@
 
             {% if user.is_authenticated %}
               {% if event.has_pick %}
-              <span class="badge-pixel badge-pick-done">PICK HECHO</span>
+              <span class="badge-pixel badge-pick-done">SELECCION HECHA</span>
               {% elif event.status == "OPEN" %}
               <span class="badge-pixel badge-pick-pending">PENDIENTE</span>
               {% endif %}
@@ -60,7 +60,7 @@
             </a>
             {% if event.status == "OPEN" and user.is_authenticated %}
             <a href="{% url 'predictions:pick' event.gp.slug %}" class="btn btn-sm btn-warning">
-              {% if event.has_pick %}Editar pick{% else %}Hacer pick{% endif %}
+              {% if event.has_pick %}Editar seleccion{% else %}Hacer seleccion{% endif %}
             </a>
             {% endif %}
           </div>
