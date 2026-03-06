@@ -5,3 +5,11 @@ services:
     plan: free
     buildCommand: ./build.sh
     startCommand: gunicorn config.wsgi:application
+
+  - type: cron
+    name: f1-fetch-results
+    env: python
+    plan: free
+    schedule: "0 14-21 * * 0,6"  # Cada hora de 14-21 UTC los sábados y domingos
+    buildCommand: ./build.sh
+    startCommand: python manage.py fetch_results

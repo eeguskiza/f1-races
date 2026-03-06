@@ -203,7 +203,7 @@ class Prediction(models.Model):
         if gp.result_alonso_pos is not None:
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
-                score += alonso_pts * 2
+                score += F1_POINTS[1] if gp.result_alonso_pos == 0 else alonso_pts * 2
             elif gp.result_alonso_pos <= 10:
                 score += alonso_pts
 
@@ -211,7 +211,7 @@ class Prediction(models.Model):
         if gp.result_sainz_pos is not None:
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
-                score += sainz_pts * 2
+                score += F1_POINTS[1] if gp.result_sainz_pos == 0 else sainz_pts * 2
             elif gp.result_sainz_pos <= 10:
                 score += sainz_pts
 
