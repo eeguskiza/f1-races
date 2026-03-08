@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Min
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -144,10 +144,24 @@ def race_detail(request, slug):
             user=request.user, event=gp
         ).select_related("p1", "p2", "p3", "p4", "p5").first()
 
+    ranked_picks = []
+    if gp.is_locked:
+        picks_qs = list(
+            Prediction.objects.filter(event=gp)
+            .select_related("user", "p1", "p2", "p3", "p4", "p5")
+            .order_by("-score", "submitted_at")
+        )
+        rank = 1
+        for i, pick in enumerate(picks_qs):
+            if i > 0 and pick.score != picks_qs[i - 1].score:
+                rank = i + 1
+            ranked_picks.append((rank, pick))
+
     return render(request, "predictions/race_detail.html", {
         "gp": gp,
         "sessions": sessions,
         "user_prediction": user_prediction,
+        "ranked_picks": ranked_picks,
     })
 
 
@@ -238,6 +252,7 @@ def leaderboard(request):
         for row in Prediction.objects.values("user_id").annotate(
             total_score=Sum("score"),
             picks_count=Count("id"),
+            first_pick=Min("submitted_at"),
         )
     }
 
@@ -249,10 +264,11 @@ def leaderboard(request):
             "username": user.username,
             "total_score": stats["total_score"] or 0 if stats else 0,
             "picks_count": stats["picks_count"] if stats else 0,
+            "first_pick": stats["first_pick"] if stats else None,
         })
 
     if has_scored_predictions:
-        users_data.sort(key=lambda x: (-x["total_score"], -x["picks_count"], x["username"]))
+        users_data.sort(key=lambda x: (-x["total_score"], x["first_pick"] or timezone.now()))
     else:
         users_data.sort(key=lambda x: (-x["picks_count"], x["username"]))
 

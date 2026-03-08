@@ -217,6 +217,51 @@ class Prediction(models.Model):
 
         return score
 
+    def score_breakdown(self) -> dict:
+        """Returns per-pick points: p1..p5, alonso, sainz. None if no results."""
+        gp = self.event
+        if not gp.has_results:
+            return None
+
+        result_map = {
+            1: gp.result_p1_id,
+            2: gp.result_p2_id,
+            3: gp.result_p3_id,
+            4: gp.result_p4_id,
+            5: gp.result_p5_id,
+        }
+        driver_to_pos = {drv_id: pos for pos, drv_id in result_map.items()}
+
+        breakdown = {}
+        for pos in range(1, 6):
+            predicted_id = getattr(self, f"p{pos}_id")
+            actual_pos = driver_to_pos.get(predicted_id)
+            if actual_pos is None:
+                breakdown[f"p{pos}"] = 0
+            else:
+                real_pts = F1_POINTS[actual_pos]
+                breakdown[f"p{pos}"] = real_pts if actual_pos == pos else real_pts // 2
+
+        alonso = 0
+        if gp.result_alonso_pos is not None:
+            alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
+            if self.alonso_pos_guess == gp.result_alonso_pos:
+                alonso = F1_POINTS[1] if gp.result_alonso_pos == 0 else alonso_pts * 2
+            elif gp.result_alonso_pos <= 10:
+                alonso = alonso_pts
+        breakdown["alonso"] = alonso
+
+        sainz = 0
+        if gp.result_sainz_pos is not None:
+            sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
+            if self.sainz_pos_guess == gp.result_sainz_pos:
+                sainz = F1_POINTS[1] if gp.result_sainz_pos == 0 else sainz_pts * 2
+            elif gp.result_sainz_pos <= 10:
+                sainz = sainz_pts
+        breakdown["sainz"] = sainz
+
+        return breakdown
+
     def save(self, *args, **kwargs):
         # Skip deadline check if updating score only
         if not kwargs.pop("skip_lock_check", False):

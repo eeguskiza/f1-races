@@ -141,4 +141,100 @@
     {% endif %}
   </div>
 </div>
+
+{% if gp.is_locked and ranked_picks %}
+<div class="row mt-4">
+  <div class="col-12">
+    <h3 class="pixel-title-sm mb-3">SELECCIONES</h3>
+
+    {% if gp.has_results %}
+    <div class="pixel-box mb-3">
+      <p class="small text-muted mb-1">Resultado oficial:</p>
+      <div class="d-flex flex-wrap gap-1">
+        <span class="driver-chip chip-hit">P1 {{ gp.result_p1.code }}</span>
+        <span class="driver-chip chip-hit">P2 {{ gp.result_p2.code }}</span>
+        <span class="driver-chip chip-hit">P3 {{ gp.result_p3.code }}</span>
+        <span class="driver-chip chip-hit">P4 {{ gp.result_p4.code }}</span>
+        <span class="driver-chip chip-hit">P5 {{ gp.result_p5.code }}</span>
+        <span class="driver-chip">ALO {% if gp.result_alonso_pos == 0 %}DNF{% else %}P{{ gp.result_alonso_pos }}{% endif %}</span>
+        <span class="driver-chip">SAI {% if gp.result_sainz_pos == 0 %}DNF{% else %}P{{ gp.result_sainz_pos }}{% endif %}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card-dark">
+      <div class="table-responsive">
+        <table class="table table-dark mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Usuario</th>
+              <th class="text-center">P1</th>
+              <th class="text-center">P2</th>
+              <th class="text-center">P3</th>
+              <th class="text-center">P4</th>
+              <th class="text-center">P5</th>
+              <th class="text-center">ALO</th>
+              <th class="text-center">SAI</th>
+              {% if gp.has_results %}<th class="text-end">Pts</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for rank, pick in ranked_picks %}
+            <tr>
+              <td class="text-muted">{{ rank }}</td>
+              <td>
+                <span class="{% if user.username == pick.user.username %}text-accent{% endif %}">
+                  {{ pick.user.username }}
+                  {% if user.username == pick.user.username %}<span class="text-muted small">(tu)</span>{% endif %}
+                </span>
+              </td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p1 == pick.p1 %} chip-hit{% endif %}">{{ pick.p1.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p2 == pick.p2 %} chip-hit{% endif %}">{{ pick.p2.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p3 == pick.p3 %} chip-hit{% endif %}">{{ pick.p3.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p4 == pick.p4 %} chip-hit{% endif %}">{{ pick.p4.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p5 == pick.p5 %} chip-hit{% endif %}">{{ pick.p5.code }}</span></td>
+              <td class="text-center">
+                <span class="driver-chip{% if gp.result_alonso_pos == pick.alonso_pos_guess %} chip-hit{% endif %}">
+                  {% if pick.alonso_pos_guess == 0 %}DNF{% else %}P{{ pick.alonso_pos_guess }}{% endif %}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="driver-chip{% if gp.result_sainz_pos == pick.sainz_pos_guess %} chip-hit{% endif %}">
+                  {% if pick.sainz_pos_guess == 0 %}DNF{% else %}P{{ pick.sainz_pos_guess }}{% endif %}
+                </span>
+              </td>
+              {% if gp.has_results %}
+              <td class="text-end">
+                {% if pick.score is not None %}
+                  {% with b=pick.score_breakdown %}
+                  <span class="text-accent pixel-title-sm">{{ pick.score }}</span>
+                  {% if b %}
+                  <div class="text-muted" style="font-size:0.7rem;line-height:1.3;">
+                    {{ pick.p1.code }}:{{ b.p1 }} ·
+                    {{ pick.p2.code }}:{{ b.p2 }} ·
+                    {{ pick.p3.code }}:{{ b.p3 }} ·
+                    {{ pick.p4.code }}:{{ b.p4 }} ·
+                    {{ pick.p5.code }}:{{ b.p5 }} ·
+                    ALO:{{ b.alonso }} ·
+                    SAI:{{ b.sainz }}
+                  </div>
+                  {% endif %}
+                  {% endwith %}
+                {% else %}
+                <span class="text-muted small">-</span>
+                {% endif %}
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="text-muted small mt-2">Verde = acierto exacto de posicion.</p>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

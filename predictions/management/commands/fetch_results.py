@@ -23,7 +23,7 @@ SAINZ_CODE = "SAI"
 
 def _is_classified_finish(status: str) -> bool:
     """Returns True if the status indicates the driver finished the race."""
-    return status == "Finished" or status.startswith("+")
+    return status in ("Finished", "Lapped") or status.startswith("+")
 
 
 class Command(BaseCommand):
