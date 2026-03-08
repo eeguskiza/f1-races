@@ -613,6 +613,12 @@ body{
   color: #00c864;
   font-weight: bold;
 }
+.driver-chip.chip-near{
+  background: rgba(255,200,0,0.15);
+  border-color: #ffc800;
+  color: #ffc800;
+  font-weight: bold;
+}
 
 /* Form styling */
 .form-select, .form-control{

@@ -189,11 +189,11 @@
                   {% if user.username == pick.user.username %}<span class="text-muted small">(tu)</span>{% endif %}
                 </span>
               </td>
-              <td class="text-center"><span class="driver-chip{% if gp.result_p1 == pick.p1 %} chip-hit{% endif %}">{{ pick.p1.code }}</span></td>
-              <td class="text-center"><span class="driver-chip{% if gp.result_p2 == pick.p2 %} chip-hit{% endif %}">{{ pick.p2.code }}</span></td>
-              <td class="text-center"><span class="driver-chip{% if gp.result_p3 == pick.p3 %} chip-hit{% endif %}">{{ pick.p3.code }}</span></td>
-              <td class="text-center"><span class="driver-chip{% if gp.result_p4 == pick.p4 %} chip-hit{% endif %}">{{ pick.p4.code }}</span></td>
-              <td class="text-center"><span class="driver-chip{% if gp.result_p5 == pick.p5 %} chip-hit{% endif %}">{{ pick.p5.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p1 == pick.p1 %} chip-hit{% elif pick.p1.id in result_top5_ids %} chip-near{% endif %}">{{ pick.p1.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p2 == pick.p2 %} chip-hit{% elif pick.p2.id in result_top5_ids %} chip-near{% endif %}">{{ pick.p2.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p3 == pick.p3 %} chip-hit{% elif pick.p3.id in result_top5_ids %} chip-near{% endif %}">{{ pick.p3.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p4 == pick.p4 %} chip-hit{% elif pick.p4.id in result_top5_ids %} chip-near{% endif %}">{{ pick.p4.code }}</span></td>
+              <td class="text-center"><span class="driver-chip{% if gp.result_p5 == pick.p5 %} chip-hit{% elif pick.p5.id in result_top5_ids %} chip-near{% endif %}">{{ pick.p5.code }}</span></td>
               <td class="text-center">
                 <span class="driver-chip{% if gp.result_alonso_pos == pick.alonso_pos_guess %} chip-hit{% endif %}">
                   {% if pick.alonso_pos_guess == 0 %}DNF{% else %}P{{ pick.alonso_pos_guess }}{% endif %}
@@ -232,7 +232,10 @@
         </table>
       </div>
     </div>
-    <p class="text-muted small mt-2">Verde = acierto exacto de posicion.</p>
+    <p class="text-muted small mt-2">
+      <span class="driver-chip chip-hit" style="font-size:0.75rem;">VER</span> Posicion exacta &rarr; puntos reales completos &nbsp;|&nbsp;
+      <span class="driver-chip chip-near" style="font-size:0.75rem;">VER</span> En Top 5 pero posicion incorrecta &rarr; mitad de puntos
+    </p>
   </div>
 </div>
 {% endif %}

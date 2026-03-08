@@ -157,11 +157,16 @@ def race_detail(request, slug):
                 rank = i + 1
             ranked_picks.append((rank, pick))
 
+    result_top5_ids = set()
+    if gp.has_results:
+        result_top5_ids = {gp.result_p1_id, gp.result_p2_id, gp.result_p3_id, gp.result_p4_id, gp.result_p5_id}
+
     return render(request, "predictions/race_detail.html", {
         "gp": gp,
         "sessions": sessions,
         "user_prediction": user_prediction,
         "ranked_picks": ranked_picks,
+        "result_top5_ids": result_top5_ids,
     })
 
 
@@ -218,10 +223,14 @@ def porras(request):
 
     # Show current race until 48h after the GP, then switch to next one
     gp = None
+    switch_at = None
     for g in GrandPrix.objects.prefetch_related("sessions").all():
         race_start = g.race_start_utc
         if race_start and race_start + timedelta(hours=48) > now:
             gp = g
+            if race_start < now:
+                # Race already happened, we're in the 48h window
+                switch_at = race_start + timedelta(hours=48)
             break
 
     # If all races are done (season finished), show the last one
@@ -236,9 +245,15 @@ def porras(request):
             .order_by("user__username")
         )
 
+    result_top5_ids = set()
+    if gp and gp.has_results:
+        result_top5_ids = {gp.result_p1_id, gp.result_p2_id, gp.result_p3_id, gp.result_p4_id, gp.result_p5_id}
+
     return render(request, "predictions/porras.html", {
         "gp": gp,
         "picks": picks,
+        "switch_at": switch_at,
+        "result_top5_ids": result_top5_ids,
     })
 
 
