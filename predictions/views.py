@@ -7,8 +7,8 @@ from django.db.models import Sum, Count, Min
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from .models import GrandPrix, Prediction, NewsPost, Driver
-from .forms import PredictionForm, SignupForm
+from .models import GrandPrix, Prediction, NewsPost, Driver, Ticket, TicketAttendee
+from .forms import PredictionForm, SignupForm, TicketForm
 
 User = get_user_model()
 
@@ -255,6 +255,54 @@ def porras(request):
         "switch_at": switch_at,
         "result_top5_ids": result_top5_ids,
     })
+
+
+def tickets(request):
+    """List all ticket proposals."""
+    all_tickets = Ticket.objects.select_related("event", "created_by").prefetch_related("attendees").all()
+    return render(request, "predictions/tickets.html", {"tickets": all_tickets})
+
+
+def ticket_detail(request, pk):
+    """Detail view for a ticket proposal."""
+    ticket = get_object_or_404(Ticket.objects.select_related("event", "created_by").prefetch_related("attendees__user"), pk=pk)
+    is_attending = ticket.is_attending(request.user)
+    return render(request, "predictions/ticket_detail.html", {
+        "ticket": ticket,
+        "is_attending": is_attending,
+    })
+
+
+@login_required
+def ticket_create(request):
+    """Create a new ticket proposal."""
+    if request.method == "POST":
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.created_by = request.user
+            ticket.save()
+            messages.success(request, f"Propuesta '{ticket.title}' creada.")
+            return redirect("predictions:ticket_detail", pk=ticket.pk)
+    else:
+        form = TicketForm()
+    return render(request, "predictions/ticket_create.html", {"form": form})
+
+
+@login_required
+def ticket_attend(request, pk):
+    """Toggle attendance for a ticket proposal."""
+    if request.method != "POST":
+        return redirect("predictions:ticket_detail", pk=pk)
+    ticket = get_object_or_404(Ticket, pk=pk)
+    attendee = TicketAttendee.objects.filter(ticket=ticket, user=request.user).first()
+    if attendee:
+        attendee.delete()
+        messages.success(request, "Te has desapuntado.")
+    else:
+        TicketAttendee.objects.create(ticket=ticket, user=request.user)
+        messages.success(request, "Apuntado! Nos vemos en la carrera.")
+    return redirect("predictions:ticket_detail", pk=pk)
 
 
 def leaderboard(request):

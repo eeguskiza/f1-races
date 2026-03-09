@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Prediction, Driver
+from .models import Prediction, Driver, Ticket, GrandPrix
 
 
 class SignupForm(UserCreationForm):
@@ -92,3 +92,22 @@ class PredictionForm(forms.ModelForm):
                 picks.append(driver.pk)
 
         return cleaned_data
+
+
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ["title", "event", "price", "notes"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].widget.attrs.update({"class": "form-control", "placeholder": "Ej: Grada Animacion CS"})
+        self.fields["event"].queryset = GrandPrix.objects.all()
+        self.fields["event"].widget.attrs.update({"class": "form-select"})
+        self.fields["event"].label = "Carrera"
+        self.fields["price"].widget.attrs.update({"class": "form-control", "placeholder": "Ej: 150.00"})
+        self.fields["price"].required = False
+        self.fields["price"].label = "Precio (EUR)"
+        self.fields["notes"].widget = forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Info adicional, enlace de compra, condiciones..."})
+        self.fields["notes"].required = False
+        self.fields["notes"].label = "Otros"

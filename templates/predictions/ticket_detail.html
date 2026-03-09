@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}{{ ticket.title }} - Tickets{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="{% url 'predictions:tickets' %}" class="text-muted small">&larr; Volver a Tickets</a>
+</div>
+
+<div class="row g-4">
+  <!-- Info principal -->
+  <div class="col-12 col-md-7">
+    <div class="race-card">
+      <div class="p-1">
+        <h2 class="mb-3">{{ ticket.title }}</h2>
+
+        <p class="small mb-2">
+          <span class="text-muted">Carrera:</span>
+          <a href="{% url 'predictions:race_detail' ticket.event.slug %}" class="text-light">
+            {{ ticket.event.name }} ({{ ticket.event.season_year }})
+          </a>
+        </p>
+
+        {% if ticket.event.race_start_utc %}
+        <p class="small mb-2">
+          <span class="text-muted">Fecha carrera:</span> {{ ticket.event.race_start_utc|date:"d M Y, H:i" }} UTC
+        </p>
+        {% endif %}
+
+        {% if ticket.price %}
+        <p class="small mb-2">
+          <span class="text-muted">Precio:</span> <strong>{{ ticket.price }} EUR</strong>
+        </p>
+        {% else %}
+        <p class="small mb-2 text-muted">Precio: no especificado</p>
+        {% endif %}
+
+        {% if ticket.notes %}
+        <div class="mt-3">
+          <p class="text-muted small mb-1">Otros:</p>
+          <p class="small" style="white-space: pre-line;">{{ ticket.notes }}</p>
+        </div>
+        {% endif %}
+
+        <p class="text-muted small mt-3 mb-0">Publicado por {{ ticket.created_by.username }} el {{ ticket.created_at|date:"d M Y" }}</p>
+      </div>
+    </div>
+
+    <!-- Boton apuntarse -->
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'predictions:ticket_attend' ticket.pk %}" class="mt-3">
+      {% csrf_token %}
+      {% if is_attending %}
+      <button type="submit" class="btn btn-outline-light">Desapuntarme</button>
+      {% else %}
+      <button type="submit" class="btn btn-warning">Apuntame</button>
+      {% endif %}
+    </form>
+    {% else %}
+    <p class="small text-muted mt-3"><a href="{% url 'login' %}" class="text-warning">Inicia sesion</a> para apuntarte.</p>
+    {% endif %}
+  </div>
+
+  <!-- Apuntados -->
+  <div class="col-12 col-md-5">
+    <div class="race-card">
+      <div class="p-1">
+        <h5 class="mb-3">Apuntados ({{ ticket.attendee_count }})</h5>
+        {% if ticket.attendees.all %}
+        <ul class="list-unstyled mb-0">
+          {% for a in ticket.attendees.all %}
+          <li class="small py-1 border-bottom border-secondary">
+            {{ a.user.username }}
+            <span class="text-muted ms-2" style="font-size:0.75em;">{{ a.created_at|date:"d M" }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">Nadie apuntado todavia. Se el primero!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

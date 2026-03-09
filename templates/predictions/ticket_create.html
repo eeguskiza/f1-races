@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Nueva propuesta - Tickets{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="{% url 'predictions:tickets' %}" class="text-muted small">&larr; Volver a Tickets</a>
+</div>
+
+<h1 class="pixel-title mb-4">NUEVA PROPUESTA</h1>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6">
+    <div class="race-card">
+      <div class="p-2">
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="{{ form.title.id_for_label }}" class="form-label small text-muted">Titulo</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.event.id_for_label }}" class="form-label small text-muted">Carrera</label>
+            {{ form.event }}
+            {% if form.event.errors %}
+            <div class="text-danger small mt-1">{{ form.event.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.price.id_for_label }}" class="form-label small text-muted">{{ form.price.label }}</label>
+            {{ form.price }}
+            {% if form.price.errors %}
+            <div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label for="{{ form.notes.id_for_label }}" class="form-label small text-muted">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger small">{{ form.non_field_errors.0 }}</div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-warning w-100">Publicar propuesta</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -203,7 +203,7 @@ class Prediction(models.Model):
         if gp.result_alonso_pos is not None:
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
-                score += F1_POINTS[1] if gp.result_alonso_pos == 0 else alonso_pts * 2
+                score += 2 if gp.result_alonso_pos == 0 else alonso_pts * 2
             elif gp.result_alonso_pos <= 10:
                 score += alonso_pts
 
@@ -211,7 +211,7 @@ class Prediction(models.Model):
         if gp.result_sainz_pos is not None:
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
-                score += F1_POINTS[1] if gp.result_sainz_pos == 0 else sainz_pts * 2
+                score += 2 if gp.result_sainz_pos == 0 else sainz_pts * 2
             elif gp.result_sainz_pos <= 10:
                 score += sainz_pts
 
@@ -267,6 +267,46 @@ class Prediction(models.Model):
         if not kwargs.pop("skip_lock_check", False):
             self.full_clean()
         super().save(*args, **kwargs)
+
+
+class Ticket(models.Model):
+    """A proposal to attend a race (grandstand, trip, etc.)."""
+    title = models.CharField(max_length=200)
+    event = models.ForeignKey(GrandPrix, on_delete=models.CASCADE, related_name="tickets")
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tickets_created")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} - {self.event.name}"
+
+    def attendee_count(self):
+        return self.attendees.count()
+
+    def is_attending(self, user):
+        if not user.is_authenticated:
+            return False
+        return self.attendees.filter(user=user).exists()
+
+
+class TicketAttendee(models.Model):
+    """A user signed up for a ticket proposal."""
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="attendees")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ticket_attendances")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["ticket", "user"], name="uniq_ticket_attendee")
+        ]
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.ticket.title}"
 
 
 class NewsPost(models.Model):
