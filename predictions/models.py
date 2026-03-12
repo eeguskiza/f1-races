@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta, timezone as dt_timezone
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -74,7 +74,17 @@ class GrandPrix(models.Model):
 
     @property
     def deadline_utc(self):
-        """Predictions close 24h before FP1."""
+        """Predictions close Friday 23:59:59 UTC, but never after QUALI start."""
+        quali = self.sessions.filter(session_type="QUALI").first()
+        if quali:
+            quali_start = quali.start_utc.astimezone(dt_timezone.utc)
+            # Find the Friday of the same F1 weekend as QUALI.
+            days_since_friday = (quali_start.weekday() - 4) % 7
+            friday_date = (quali_start - timedelta(days=days_since_friday)).date()
+            friday_end = datetime.combine(friday_date, time(23, 59, 59), tzinfo=dt_timezone.utc)
+            return min(friday_end, quali_start)
+
+        # Fallback when QUALI is missing: preserve previous behavior.
         fp1 = self.fp1_start_utc
         if fp1:
             return fp1 - timedelta(hours=24)

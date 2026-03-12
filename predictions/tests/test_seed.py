@@ -1,5 +1,5 @@
 """Tests for seed_2026 management command and model logic."""
-from datetime import timedelta
+from datetime import datetime, time, timedelta, timezone as dt_timezone
 from io import StringIO
 
 from django.contrib.auth import get_user_model
@@ -51,13 +51,16 @@ class SeedCommandTests(TestCase):
                 f"Event {gp.name} missing FP1 session"
             )
 
-    def test_deadline_is_24h_before_fp1(self):
-        """Deadline should be 24 hours before FP1."""
+    def test_deadline_is_friday_end_before_quali(self):
+        """Deadline should be Friday 23:59:59 UTC (or QUALI start, if earlier)."""
         call_command("seed_2026", stdout=StringIO())
         gp = GrandPrix.objects.first()
-        fp1 = gp.fp1_start_utc
+        quali = gp.sessions.get(session_type="QUALI").start_utc.astimezone(dt_timezone.utc)
+        days_since_friday = (quali.weekday() - 4) % 7
+        friday_date = (quali - timedelta(days=days_since_friday)).date()
+        friday_end = datetime.combine(friday_date, time(23, 59, 59), tzinfo=dt_timezone.utc)
         deadline = gp.deadline_utc
-        self.assertEqual(deadline, fp1 - timedelta(hours=24))
+        self.assertEqual(deadline, min(friday_end, quali))
 
     def test_driver_alonso_exists(self):
         call_command("seed_2026", stdout=StringIO())
@@ -80,7 +83,7 @@ class DeadlineValidationTests(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
 
     def test_prediction_blocked_after_deadline(self):
-        """Cannot create prediction after deadline (FP1 - 24h)."""
+        """Cannot create prediction after deadline."""
         # Create event with FP1 in the past
         gp = GrandPrix.objects.create(
             season_year=2026,
@@ -88,7 +91,7 @@ class DeadlineValidationTests(TestCase):
             name="Test GP",
             slug="test-gp"
         )
-        # FP1 was 24 hours ago, so deadline has already passed
+        # FP1 was 24 hours ago and no QUALI is set, so fallback deadline passed
         Session.objects.create(
             event=gp,
             session_type="FP1",
