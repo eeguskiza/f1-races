@@ -7,6 +7,7 @@ from django.utils import timezone
 
 # F1 championship points by finishing position
 F1_POINTS = {1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1}
+DNF_EXACT_POINTS = 2
 
 
 class Team(models.Model):
@@ -213,7 +214,7 @@ class Prediction(models.Model):
         if gp.result_alonso_pos is not None:
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
-                score += 2 if gp.result_alonso_pos == 0 else alonso_pts * 2
+                score += DNF_EXACT_POINTS if gp.result_alonso_pos == 0 else alonso_pts * 2
             elif gp.result_alonso_pos <= 10:
                 score += alonso_pts
 
@@ -221,7 +222,7 @@ class Prediction(models.Model):
         if gp.result_sainz_pos is not None:
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
-                score += 2 if gp.result_sainz_pos == 0 else sainz_pts * 2
+                score += DNF_EXACT_POINTS if gp.result_sainz_pos == 0 else sainz_pts * 2
             elif gp.result_sainz_pos <= 10:
                 score += sainz_pts
 
@@ -256,7 +257,7 @@ class Prediction(models.Model):
         if gp.result_alonso_pos is not None:
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
-                alonso = F1_POINTS[1] if gp.result_alonso_pos == 0 else alonso_pts * 2
+                alonso = DNF_EXACT_POINTS if gp.result_alonso_pos == 0 else alonso_pts * 2
             elif gp.result_alonso_pos <= 10:
                 alonso = alonso_pts
         breakdown["alonso"] = alonso
@@ -265,7 +266,7 @@ class Prediction(models.Model):
         if gp.result_sainz_pos is not None:
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
-                sainz = F1_POINTS[1] if gp.result_sainz_pos == 0 else sainz_pts * 2
+                sainz = DNF_EXACT_POINTS if gp.result_sainz_pos == 0 else sainz_pts * 2
             elif gp.result_sainz_pos <= 10:
                 sainz = sainz_pts
         breakdown["sainz"] = sainz
