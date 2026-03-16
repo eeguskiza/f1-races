@@ -111,19 +111,21 @@ def races(request):
     user_predictions = {}
     if user.is_authenticated:
         for pred in Prediction.objects.filter(user=user).select_related("event"):
-            user_predictions[pred.event_id] = True
+            user_predictions[pred.event_id] = {"score": pred.score}
 
     for gp in GrandPrix.objects.prefetch_related("sessions").all():
         race_start = gp.race_start_utc
         deadline = gp.deadline_utc
         is_locked = gp.is_locked
+        pred_data = user_predictions.get(gp.id)
 
         events.append({
             "gp": gp,
             "race_start": race_start,
             "deadline": deadline,
             "status": "CLOSED" if is_locked else "OPEN",
-            "has_pick": user_predictions.get(gp.id, False),
+            "has_pick": pred_data is not None,
+            "user_score": pred_data["score"] if pred_data else None,
         })
 
     return render(request, "predictions/races.html", {"events": events})

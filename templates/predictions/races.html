@@ -36,6 +36,14 @@
           </p>
           {% endif %}
 
+          <!-- Puntuacion usuario -->
+          {% if user.is_authenticated and event.user_score is not None %}
+          <p class="small mb-2">
+            <span class="text-muted">Mis puntos:</span>
+            <span class="text-accent fw-bold">{{ event.user_score }} PTS</span>
+          </p>
+          {% endif %}
+
           <!-- Badges -->
           <div class="d-flex flex-wrap gap-2 mb-3">
             {% if event.status == "OPEN" %}

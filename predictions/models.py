@@ -215,7 +215,7 @@ class Prediction(models.Model):
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
                 score += DNF_EXACT_POINTS if gp.result_alonso_pos == 0 else alonso_pts * 2
-            elif gp.result_alonso_pos <= 10:
+            elif 1 <= gp.result_alonso_pos <= 10 and 1 <= self.alonso_pos_guess <= 10:
                 score += alonso_pts
 
         # Sainz scoring (same rules)
@@ -223,7 +223,7 @@ class Prediction(models.Model):
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
                 score += DNF_EXACT_POINTS if gp.result_sainz_pos == 0 else sainz_pts * 2
-            elif gp.result_sainz_pos <= 10:
+            elif 1 <= gp.result_sainz_pos <= 10 and 1 <= self.sainz_pos_guess <= 10:
                 score += sainz_pts
 
         return score
@@ -258,7 +258,7 @@ class Prediction(models.Model):
             alonso_pts = F1_POINTS.get(gp.result_alonso_pos, 0)
             if self.alonso_pos_guess == gp.result_alonso_pos:
                 alonso = DNF_EXACT_POINTS if gp.result_alonso_pos == 0 else alonso_pts * 2
-            elif gp.result_alonso_pos <= 10:
+            elif 1 <= gp.result_alonso_pos <= 10 and 1 <= self.alonso_pos_guess <= 10:
                 alonso = alonso_pts
         breakdown["alonso"] = alonso
 
@@ -267,7 +267,7 @@ class Prediction(models.Model):
             sainz_pts = F1_POINTS.get(gp.result_sainz_pos, 0)
             if self.sainz_pos_guess == gp.result_sainz_pos:
                 sainz = DNF_EXACT_POINTS if gp.result_sainz_pos == 0 else sainz_pts * 2
-            elif gp.result_sainz_pos <= 10:
+            elif 1 <= gp.result_sainz_pos <= 10 and 1 <= self.sainz_pos_guess <= 10:
                 sainz = sainz_pts
         breakdown["sainz"] = sainz
 
