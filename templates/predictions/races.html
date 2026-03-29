@@ -46,13 +46,15 @@
 
           <!-- Badges -->
           <div class="d-flex flex-wrap gap-2 mb-3">
-            {% if event.status == "OPEN" %}
+            {% if event.status == "CANCELLED" %}
+            <span class="badge-pixel badge-closed">CANCELADO</span>
+            {% elif event.status == "OPEN" %}
             <span class="badge-pixel badge-open">ABIERTO</span>
             {% else %}
             <span class="badge-pixel badge-closed">CERRADO</span>
             {% endif %}
 
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and event.status != "CANCELLED" %}
               {% if event.has_pick %}
               <span class="badge-pixel badge-pick-done">SELECCION HECHA</span>
               {% elif event.status == "OPEN" %}
@@ -63,6 +65,7 @@
 
           <!-- Actions -->
           <div class="d-flex flex-wrap gap-2">
+            {% if event.status != "CANCELLED" %}
             <a href="{% url 'predictions:race_detail' event.gp.slug %}" class="btn btn-sm btn-outline-light">
               Ver detalle
             </a>
@@ -70,6 +73,7 @@
             <a href="{% url 'predictions:pick' event.gp.slug %}" class="btn btn-sm btn-warning">
               {% if event.has_pick %}Editar seleccion{% else %}Hacer seleccion{% endif %}
             </a>
+            {% endif %}
             {% endif %}
           </div>
         </div>

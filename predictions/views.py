@@ -25,7 +25,7 @@ def home(request):
     # Next GP (first with race_start_utc in future)
     now = timezone.now()
     next_event = None
-    for gp in GrandPrix.objects.prefetch_related("sessions").all():
+    for gp in GrandPrix.objects.prefetch_related("sessions").filter(cancelled=False):
         race_start = gp.race_start_utc
         if race_start and race_start > now:
             next_event = gp
@@ -68,13 +68,13 @@ def dashboard(request):
     )["total"] or 0
     total_picks = user_predictions.count()
     scored_picks = user_predictions.filter(score__isnull=False).count()
-    total_races = GrandPrix.objects.count()
+    total_races = GrandPrix.objects.filter(cancelled=False).count()
     missing_picks = max(total_races - total_picks, 0)
 
     # Next race (first event with RACE session in future)
     next_event = None
     user_prediction = None
-    for gp in GrandPrix.objects.prefetch_related("sessions").all():
+    for gp in GrandPrix.objects.prefetch_related("sessions").filter(cancelled=False):
         race_start = gp.race_start_utc
         if race_start and race_start > now:
             next_event = gp
@@ -119,11 +119,18 @@ def races(request):
         is_locked = gp.is_locked
         pred_data = user_predictions.get(gp.id)
 
+        if gp.cancelled:
+            status = "CANCELLED"
+        elif is_locked:
+            status = "CLOSED"
+        else:
+            status = "OPEN"
+
         events.append({
             "gp": gp,
             "race_start": race_start,
             "deadline": deadline,
-            "status": "CLOSED" if is_locked else "OPEN",
+            "status": status,
             "has_pick": pred_data is not None,
             "user_score": pred_data["score"] if pred_data else None,
         })
@@ -177,8 +184,8 @@ def pick(request, slug):
     """Create or edit a prediction for a GP."""
     gp = get_object_or_404(GrandPrix, slug=slug)
 
-    # Check if locked
-    if gp.is_locked:
+    # Check if cancelled or locked
+    if gp.cancelled or gp.is_locked:
         return render(request, "predictions/pick.html", {
             "gp": gp,
             "locked": True,
@@ -226,7 +233,7 @@ def porras(request):
     # Show current race until 48h after the GP, then switch to next one
     gp = None
     switch_at = None
-    for g in GrandPrix.objects.prefetch_related("sessions").all():
+    for g in GrandPrix.objects.prefetch_related("sessions").filter(cancelled=False):
         race_start = g.race_start_utc
         if race_start and race_start + timedelta(hours=48) > now:
             gp = g
@@ -237,7 +244,7 @@ def porras(request):
 
     # If all races are done (season finished), show the last one
     if gp is None:
-        gp = GrandPrix.objects.prefetch_related("sessions").last()
+        gp = GrandPrix.objects.prefetch_related("sessions").filter(cancelled=False).last()
 
     picks = []
     if gp:
@@ -337,7 +344,7 @@ def leaderboard(request):
     else:
         users_data.sort(key=lambda x: (-x["picks_count"], x["username"]))
 
-    total_races = GrandPrix.objects.count()
+    total_races = GrandPrix.objects.filter(cancelled=False).count()
     active_players = sum(1 for data in users_data if data["picks_count"] > 0)
 
     return render(request, "predictions/leaderboard.html", {

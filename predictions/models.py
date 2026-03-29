@@ -44,6 +44,7 @@ class GrandPrix(models.Model):
     slug = models.SlugField(max_length=140, unique=True)
     country = models.CharField(max_length=80, blank=True)
     circuit = models.CharField(max_length=120, blank=True)
+    cancelled = models.BooleanField(default=False)
 
     # Results
     result_p1 = models.ForeignKey(Driver, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")

@@ -49,8 +49,8 @@ calculate_scores.short_description = "Calcular puntuaciones"
 
 @admin.register(GrandPrix)
 class GrandPrixAdmin(admin.ModelAdmin):
-    list_display = ["round", "name", "country", "season_year", "is_locked", "has_results"]
-    list_filter = ["season_year"]
+    list_display = ["round", "name", "country", "season_year", "cancelled", "is_locked", "has_results"]
+    list_filter = ["season_year", "cancelled"]
     prepopulated_fields = {"slug": ("name",)}
     inlines = [SessionInline]
     actions = [calculate_scores]
